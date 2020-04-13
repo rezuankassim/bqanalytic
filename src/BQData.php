@@ -4,9 +4,11 @@ namespace RezuanKassim\BQAnalytic;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BigQueryData extends Model
+class BQData extends Model
 {
     protected $guarded = [];
+
+    protected $table = 'bq_data';
 
     protected $casts = [
         'event_date' => 'date:Ymd',

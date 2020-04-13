@@ -186,20 +186,4 @@ class BQAnalytic
 
         return $results;
     }
-
-    private function returnResults($query)
-    {
-        $query = BigQuery::query($query);
-        $rawResults = BigQuery::runQuery($query);
-
-        $results = [];
-        
-        foreach ($rawResults as $key => $row) {
-            foreach ($row as $column => $value) {
-                $results[$key][$column] = $value;
-            }
-        }
-
-        return $results;
-    }
 }

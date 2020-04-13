@@ -20,7 +20,14 @@ return [
      *
      * This is the directory of the bigquery model in the project
      */
-    'bigquery' => env('BQANALYTIC_BIGQUERY_MODEL', \RezuanKassim\BQAnalytic\BigQueryData::class),
+    'bigquery' => env('BQANALYTIC_BQ_MODEL', \RezuanKassim\BQAnalytic\BQData::class),
+
+    /**
+     * Big Query Table model
+     * 
+     * This is the directory of the bigquery table model in the project
+     */
+    'bigquery_table' => env('BQANALYTIC_BQ_TABLE', \RezuanKassim\BQAnalytic\BQTable::class),
 
      /**
      * Big Query Table Name 

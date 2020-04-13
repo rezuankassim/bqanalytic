@@ -3,9 +3,14 @@
 namespace RezuanKassim\BQAnalytic;
 
 use Illuminate\Support\ServiceProvider;
+use RezuanKassim\BQAnalytic\Commands\ExportDataFromBigQuery;
 
 class BQAnalyticServiceProvider extends ServiceProvider
 {
+    protected $commands = [
+        ExportDataFromBigQuery::class,
+    ];
+
     /**
      * Perform post-registration booting of services.
      *
@@ -81,6 +86,6 @@ class BQAnalyticServiceProvider extends ServiceProvider
         ], 'bqanalytic.views');*/
 
         // Registering package commands.
-        // $this->commands([]);
+        $this->commands($this->commands);
     }
 }
