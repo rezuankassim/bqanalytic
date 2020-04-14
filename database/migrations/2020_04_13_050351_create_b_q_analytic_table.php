@@ -13,7 +13,7 @@ class CreateBQAnalyticTable extends Migration
      */
     public function up()
     {
-        Schema::create('big_query_data', function (Blueprint $table) {
+        Schema::create('bq_data', function (Blueprint $table) {
             $table->string('event_date')->nullable();
             $table->bigInteger('event_timestamp')->nullable();
             $table->string('event_name')->nullable();
@@ -60,7 +60,7 @@ class CreateBQAnalyticTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('big_queries');
+        Schema::dropIfExists('bq_data');
         Schema::dropIfExists('analytics');
         Schema::dropIfExists('analytic_user');
     }
