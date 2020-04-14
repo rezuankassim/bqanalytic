@@ -4,7 +4,9 @@ namespace RezuanKassim\BQAnalytic\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use RezuanKassim\BQAnalytic\BQData;
 use RezuanKassim\BQAnalytic\BQTable;
+use RezuanKassim\BQAnalytic\ProgressBar;
 use SchulzeFelix\BigQuery\BigQueryFacade as BigQuery;
 
 /**
@@ -14,6 +16,7 @@ use SchulzeFelix\BigQuery\BigQueryFacade as BigQuery;
  **/
 class ExportDataFromBigQuery extends Command
 {
+    use ProgressBar;
     /**
      * The name and signature of the console command.
      * @var string
@@ -35,21 +38,40 @@ class ExportDataFromBigQuery extends Command
      */
     public function handle()
     {
-        $start_date = collect();
+        $start_dates = collect();
 
-        dd($period = $this->getPeriod());
+        $this->startProgressBar(6);
 
-        if (BQTable::where('table_date', Carbon::yesterday())->count() == 0) {
-            $start_date->push(Carbon::yesterday()->format('Ymd'));
-        }
+        $period = $this->getPeriod();
 
-        foreach (BQTable::where('status', false)->get() as $failed_data) {
-            if ($failed_data->table_date != Carbon::yesterday()->format('Ymd')) {
-                $start_date->push($failed_data->table_date->format('Ymd'));
+        $this->makeProgress();
+
+        if ($period->isEmpty()) {
+            if (BQTable::where('table_date', Carbon::yesterday()->format('Ymd'))->count() == 0) {
+                $start_dates->push(Carbon::yesterday()->format('Ymd'));
+            }
+
+            foreach (BQTable::where('status', false)->get() as $failed_data) {
+                if ($failed_data->table_date != Carbon::yesterday()->format('Ymd')) {
+                    $start_dates->push($failed_data->table_date->format('Ymd'));
+                }
+            }
+
+            $this->makeProgress();
+
+            foreach ($start_dates as $startdate) {
+                $this->getAllResultsAndStoreIntoDatabase($startdate);
+            }
+        } else {
+            $this->makeProgress();
+            
+            foreach ($period as $startdate) {
+                $this->getAllResultsAndStoreIntoDatabase($startdate);
             }
         }
 
-        dd($start_date);
+
+        $this->finishProgress('export finished');
     }
 
     private function getPeriod()
@@ -95,10 +117,23 @@ class ExportDataFromBigQuery extends Command
                 }
             }
 
-            return 'successful imported '.$results->count();
+            return BQTable::create([
+                'table_date' => $start_date,
+                'status' => 1
+            ]);
         }
 
-        return 'failed to import data';
+        $this->removeDataWithStartDate($start_date);
+
+        return BQTable::create([
+            'table_date' => $start_date,
+            'status' => 0
+        ]);
+    }
+
+    private function removeDataWithStartDate($start_date)
+    {
+        BQData::where('event_date', $start_date)->delete();
     }
 
     private function returnResults($query)

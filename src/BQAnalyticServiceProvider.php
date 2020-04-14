@@ -19,7 +19,7 @@ class BQAnalyticServiceProvider extends ServiceProvider
     public function boot()
     {
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'rezuankassim');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'rezuankassim');
+        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'bqanalytic');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
 
