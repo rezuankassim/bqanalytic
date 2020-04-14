@@ -51,6 +51,8 @@ class ExportDataFromBigQuery extends Command
                 $start_dates->push(Carbon::yesterday()->format('Ymd'));
             }
 
+            dd(BQTable::where('status', false)->first()->table_date);
+
             foreach (BQTable::where('status', false)->get() as $failed_data) {
                 if ($failed_data->table_date != Carbon::yesterday()->format('Ymd')) {
                     $start_dates->push($failed_data->table_date->format('Ymd'));
@@ -58,6 +60,8 @@ class ExportDataFromBigQuery extends Command
             }
 
             $this->makeProgress();
+            
+            // dd($start_dates);
 
             foreach ($start_dates as $startdate) {
                 $this->getAllResultsAndStoreIntoDatabase($startdate);
