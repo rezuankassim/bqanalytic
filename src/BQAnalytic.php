@@ -21,6 +21,8 @@ class BQAnalytic
 
     public function getAllAnalytics()
     {
+        $results = [];
+        
         if ($this->analytic->contains('name', 'get active users')) {
             $results['activeUsers'] = $this->getActiveUsers();
         }
