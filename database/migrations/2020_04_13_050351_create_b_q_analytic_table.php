@@ -46,7 +46,7 @@ class CreateBQAnalyticTable extends Migration
 
         Schema::create('analytic_user', function (Blueprint $table) {
             $table->unsignedBigInteger('analytic_id')->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedInteger('user_id')->nullable();
             $table->foreign('analytic_id')->references('id')->on('analytics')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
