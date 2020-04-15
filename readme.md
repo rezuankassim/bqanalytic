@@ -14,8 +14,29 @@ Via Composer
 ``` bash
 $ composer require rezuankassim/bqanalytic
 ```
+Optionally you can publish the configuration file
+
+``` bash
+$ php artisan vendor:publish RezuanKassim/BQAnalytic/BQAnalyticServiceProvider
+```
 
 ## Usage
+
+In your .env file, make sure you have these value setup
+
+``` bash
+  GOOGLE_CLOUD_APPLICATION_CREDENTIALS=path_to_your_credentials_file
+  GOOGLE_CLOUD_PROJECT_ID=your_google_cloud_project_id
+  BQANALYTIC_BQ_TABLE_NAME=your_bigquery_datasets_name
+```
+
+After that
+
+``` bash
+$ php artisan db:seed --class=AnalyticSeeder
+```
+
+If you an error popup when running the command above, you need to publish the vendor file.
 
 ## Change log
 
