@@ -55,30 +55,6 @@ class BQAnalytic
         return $results;
     }
 
-    // public function getAllResultsAndStoreIntoDatabase()
-    // {
-    //     if (BigQuery::dataset(config('bqanalytic.big_query_table_name'))->table('events_'.$this->start_date)->exists()) {
-    //         $query = "
-    //             SELECT 
-    //                 *
-    //             FROM 
-    //                 ".config('bqanalytic.big_query_table_name').".events_".$this->start_date."
-    //         ";
-
-    //         $results = collect($this->returnResults($query));
-
-    //         foreach ($results->chunk(100) as $result) {
-    //             foreach ($result as $r) {
-    //                 config('bqanalytic.bigquery')::create($r);
-    //             }
-    //         }
-
-    //         return 'successful imported '.$results->count();
-    //     }
-
-    //     return 'failed to import data';
-    // }
-
     private function getActiveUsers()
     {
         $results = config('bqanalytic.bigquery')::query()
@@ -162,7 +138,9 @@ class BQAnalytic
             ->select(DB::raw("count(distinct user_pseudo_id) as user_count, JSON_UNQUOTE(JSON_EXTRACT(geo, '$.country')) as country"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('country')->get()->toArray();
 
-        $results = collect($results)->map(function ($value) use ($countries, $endResults) {
+        $results = collect($results)->filter(function ($value) {
+            return $value['country'] != null;
+        })->map(function ($value) use ($countries, $endResults) {
             $endResults[$countries->where('name.common', $value['country'])->first()->cca2] = $value['user_count'];
         });
 
