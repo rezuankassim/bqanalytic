@@ -14,7 +14,7 @@ class CreateBQTables extends Migration
     public function up()
     {
         Schema::create('bq_tables', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->string('table_date')->nullable();
             $table->boolean('status')->nullable();
             $table->timestamps();
