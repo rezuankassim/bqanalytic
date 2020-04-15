@@ -11,7 +11,7 @@ class BQTable extends Model
     protected $table = 'bq_tables';
 
     protected $casts = [
-        'table_date' => 'date:Ymd',
+        'table_date' => 'date:Y-m-d',
         'status' => 'boolean'
     ];
 }

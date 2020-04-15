@@ -47,19 +47,17 @@ class ExportDataFromBigQuery extends Command
         $this->makeProgress();
 
         if ($period->isEmpty()) {
-            if (BQTable::where('table_date', Carbon::yesterday()->format('Ymd'))->count() == 0) {
-                $start_dates->push(Carbon::yesterday()->format('Ymd'));
+            if (BQTable::where('table_date', Carbon::yesterday())->count() == 0) {
+                $start_dates->push(Carbon::yesterday());
             }
 
             foreach (BQTable::where('status', false)->get() as $failed_data) {
-                if ($failed_data->table_date != Carbon::yesterday()->format('Ymd')) {
-                    $start_dates->push($failed_data->table_date->format('Ymd'));
+                if ($failed_data->table_date != Carbon::yesterday()) {
+                    $start_dates->push($failed_data->table_date);
                 }
             }
 
             $this->makeProgress();
-            
-            // dd($start_dates);
 
             foreach ($start_dates as $startdate) {
                 $this->getAllResultsAndStoreIntoDatabase($startdate);
@@ -103,12 +101,12 @@ class ExportDataFromBigQuery extends Command
 
     private function getAllResultsAndStoreIntoDatabase($start_date)
     {
-        if (BigQuery::dataset(config('bqanalytic.big_query_table_name'))->table('events_'.$start_date)->exists()) {
+        if (BigQuery::dataset(config('bqanalytic.big_query_table_name'))->table('events_'.$start_date->format('Ymd'))->exists()) {
             $query = "
                 SELECT 
                     *
                 FROM 
-                    ".config('bqanalytic.big_query_table_name').".events_".$start_date."
+                    ".config('bqanalytic.big_query_table_name').".events_".$start_date->format('Ymd')."
             ";
 
             $results = collect($this->returnResults($query));
@@ -119,16 +117,18 @@ class ExportDataFromBigQuery extends Command
                 }
             }
 
-            return BQTable::create([
-                'table_date' => $start_date,
+            return BQTable::updateOrCreate([
+                'table_date' => $start_date->format('Y-m-d'),
+            ], [
                 'status' => 1
             ]);
         }
 
         $this->removeDataWithStartDate($start_date);
 
-        return BQTable::create([
-            'table_date' => $start_date,
+        return BQTable::updateOrCreate([
+            'table_date' => $start_date->format('Y-m-d'),
+        ], [
             'status' => 0
         ]);
     }
