@@ -20,7 +20,7 @@ Optionally you can publish the configuration file
 $ php artisan vendor:publish RezuanKassim/BQAnalytic/BQAnalyticServiceProvider
 ```
 
-## Usage
+## Important
 
 In your .env file, make sure you have these value setup
 
@@ -37,6 +37,8 @@ $ php artisan db:seed --class=AnalyticSeeder
 ```
 
 If you an error popup when running the command above, you need to publish the vendor file.
+
+## Usage
 
 ## Change log
 
