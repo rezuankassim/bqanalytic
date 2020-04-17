@@ -136,9 +136,11 @@
                 "locale": {
                     "format": "DD/MM/YYYY",
                 },
-            }, function(start, end, label) {
-                getAnalytic()
             });
+
+            $('#date').on('change', function () {
+                getAnalytic()
+            })
 
             activeUsersByPlatformChart = new Chart(document.getElementById('activeUsersByPlatformChart'), {
                 type: 'line',
@@ -154,25 +156,7 @@
 
             allEventWithEventCountPie = new Chart(document.getElementById('allEventWithEventCountPie'), {
                 type: 'doughnut',
-                data: {
-                    datasets: [
-                        {
-                            backgroundColor: [
-                                "#718096", 
-                                "#feb2b2", 
-                                "#9b2c2c", 
-                                "#f6ad55",
-                                "#c05621",
-                                "#ecc94b",
-                                "#c6f6d5",
-                                "#2f855a",
-                                "#4fd1c5",
-                                "#285e61",
-                                "#90cdf4",
-                                "#2b6cb0",
-                            ]  
-                        }]
-                }
+                data: {}
             })
 
             getAnalytic()
@@ -180,6 +164,7 @@
 
         function getAnalytic()
         {
+            console.log($('#date').val())
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -206,6 +191,7 @@
             }
 
             if (data.activeUsersByPlatform) {
+                removeData(activeUsersByPlatformChart)
                 activeUsersByPlatformChart.data.datasets.push({
                     label: 'IOS Platform',
                     data: [],
@@ -234,6 +220,24 @@
             }
 
             if (data.allEventWithEventCount) {
+                removeData(allEventWithEventCountPie)
+                allEventWithEventCountPie.data.datasets.push({
+                    data: [],
+                    backgroundColor: [
+                        "#718096", 
+                        "#feb2b2", 
+                        "#9b2c2c", 
+                        "#f6ad55",
+                        "#c05621",
+                        "#ecc94b",
+                        "#c6f6d5",
+                        "#2f855a",
+                        "#4fd1c5",
+                        "#285e61",
+                        "#90cdf4",
+                        "#2b6cb0",
+                    ]  
+                })
                 data.allEventWithEventCount.forEach((value) => {
                     allEventWithEventCountPie.data.labels.push(value.event_name)
                     allEventWithEventCountPie.data.datasets[0].data.push(value.event_count) 
@@ -247,15 +251,14 @@
             chart.data.labels.push(label);
             chart.data.datasets.forEach((dataset) => {
                 dataset.data.push(data);
+
             });
             chart.update();
         }
 
         function removeData(chart) {
-            chart.data.labels.pop();
-            chart.data.datasets.forEach((dataset) => {
-                dataset.data.pop();
-            });
+            chart.data.labels = [];
+            chart.data.datasets = [];
             chart.update();
         }
     </script>
