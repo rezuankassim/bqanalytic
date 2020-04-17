@@ -3,7 +3,6 @@
 namespace RezuanKassim\BQAnalytic\Commands;
 
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Illuminate\Console\Command;
 use RezuanKassim\BQAnalytic\BQData;
 use RezuanKassim\BQAnalytic\BQTable;
@@ -65,7 +64,7 @@ class ExportDataFromBigQuery extends Command
             }
         } else {
             $this->makeProgress();
-        
+            
             foreach ($period as $startdate) {
                 $this->getAllResultsAndStoreIntoDatabase($startdate);
             }
@@ -88,11 +87,13 @@ class ExportDataFromBigQuery extends Command
         }
 
         if ($this->argument('start') && $this->argument('end')) {
-            $period = new CarbonPeriod(Carbon::createFromFormat('Ymd', $this->argument('start'))->format('Y-m-d'), Carbon::createFromFormat('Ymd', $this->argument('end'))->format('Y-m-d'));
             $dates = collect();
+            $startDate = Carbon::createFromFormat('Ymd', $this->argument('start'));
+            $endDate = Carbon::createFromFormat('Ymd', $this->argument('end'));  
 
-            foreach($period as $date) {
-                $dates->push($date);
+            while ($startDate <= $endDate) {
+                $dates->push($startDate);
+                $startDate = Carbon::parse($startDate)->addDay();
             }
 
             $period = $dates->filter(function ($date) {
