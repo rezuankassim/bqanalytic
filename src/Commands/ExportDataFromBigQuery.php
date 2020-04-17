@@ -3,6 +3,7 @@
 namespace RezuanKassim\BQAnalytic\Commands;
 
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Console\Command;
 use RezuanKassim\BQAnalytic\BQData;
 use RezuanKassim\BQAnalytic\BQTable;
@@ -64,7 +65,7 @@ class ExportDataFromBigQuery extends Command
             }
         } else {
             $this->makeProgress();
-            
+        
             foreach ($period as $startdate) {
                 $this->getAllResultsAndStoreIntoDatabase($startdate);
             }
@@ -76,7 +77,7 @@ class ExportDataFromBigQuery extends Command
 
     private function getPeriod()
     {
-        $period = collect();
+        $period = collect([]);
 
         if ($this->argument('start') && !$this->argument('end')) {
             $this->error('You must provide end date');
@@ -87,13 +88,16 @@ class ExportDataFromBigQuery extends Command
         }
 
         if ($this->argument('start') && $this->argument('end')) {
-            $start = Carbon::createFromFormat('Ymd', $this->argument('start'));
-            $end = Carbon::createFromFormat('Ymd', $this->argument('end'));
+            $period = new CarbonPeriod(Carbon::createFromFormat('Ymd', $this->argument('start'))->format('Y-m-d'), Carbon::createFromFormat('Ymd', $this->argument('end'))->format('Y-m-d'));
+            $dates = collect();
 
-            while ($start <= $end) {
-                $period->push($start->format('Ymd'));
-                $start->addDay();
+            foreach($period as $date) {
+                $dates->push($date);
             }
+
+            $period = $dates->filter(function ($date) {
+                return BQTable::where('table_date', $date->format('Y-m-d'))->where('status', 1)->count() == 0;
+            });
         }
 
         return $period;
