@@ -195,20 +195,23 @@
                 activeUsersByPlatformChart.data.datasets.push({
                     label: 'IOS Platform',
                     data: [],
-                    backgroundColor: '#f56565',
+                    borderColor: '#f56565',
                     borderWidth: 0,
+                    fill: false,
                 })
                 activeUsersByPlatformChart.data.datasets.push({
                     label: 'Android Platform',
                     data: [],
-                    backgroundColor: '#fbd38d',
+                    borderColor: '#fbd38d',
                     borderWidth: 0,
+                    fill: false,
                 })
                 activeUsersByPlatformChart.data.datasets.push({
                     label: 'Web Platform',
                     data: [],
-                    backgroundColor: '#9ae6b4',
+                    borderColor: '#9ae6b4',
                     borderWidth: 0,
+                    fill: false,
                 })
                 data.activeUsersByPlatform.forEach((value) => {
                     activeUsersByPlatformChart.data.labels.push(value.date)
