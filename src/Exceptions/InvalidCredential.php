@@ -1,10 +1,10 @@
 <?php
 
-namespace SchulzeFelix\BigQuery\Exceptions;
+namespace RezuanKassim\BQAnalytic\Exceptions;
 
 use Exception;
 
-class InvalidConfiguration extends Exception
+class InvalidCredential extends Exception
 {
     public static function credentialsJsonDoesNotExist($path)
     {

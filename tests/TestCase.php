@@ -8,8 +8,8 @@ abstract class TestCase extends TestBench
 {
     use TestHelper;
 
-    protected const TEST_APP_TEMPLATE = __DIR__.'/../testbench/template';
-    protected const TEST_APP = __DIR__.'/../testbench/laravel';
+    protected const TEST_APP_TEMPLATE = __DIR__ . '/../testbench/template';
+    protected const TEST_APP = __DIR__ . '/../testbench/laravel';
 
     public static function setUpBeforeClass(): void
     {

@@ -4,10 +4,10 @@ namespace RezuanKassim\BQAnalytic\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use RezuanKassim\BQAnalytic\BQAnalyticClientFactory;
 use RezuanKassim\BQAnalytic\BQData;
 use RezuanKassim\BQAnalytic\BQTable;
 use RezuanKassim\BQAnalytic\ProgressBar;
-use SchulzeFelix\BigQuery\BigQueryFacade as BigQuery;
 
 /**
  * List all locally installed packages.
@@ -38,40 +38,7 @@ class ExportDataFromBigQuery extends Command
      */
     public function handle()
     {
-        $start_dates = collect();
-
-        $this->startProgressBar(6);
-
-        $period = $this->getPeriod();
-
-        $this->makeProgress();
-
-        if ($period->isEmpty()) {
-            if (BQTable::where('table_date', Carbon::yesterday())->count() == 0) {
-                $start_dates->push(Carbon::yesterday());
-            }
-
-            foreach (BQTable::where('status', false)->get() as $failed_data) {
-                if ($failed_data->table_date != Carbon::yesterday()) {
-                    $start_dates->push($failed_data->table_date);
-                }
-            }
-
-            $this->makeProgress();
-
-            foreach ($start_dates as $startdate) {
-                $this->getAllResultsAndStoreIntoDatabase($startdate);
-            }
-        } else {
-            $this->makeProgress();
-            
-            foreach ($period as $startdate) {
-                $this->getAllResultsAndStoreIntoDatabase($startdate);
-            }
-        }
-
-
-        $this->finishProgress('export finished');
+        $this->getAllResultsAndStoreIntoDatabase();
     }
 
     private function getPeriod()
@@ -89,7 +56,7 @@ class ExportDataFromBigQuery extends Command
         if ($this->argument('start') && $this->argument('end')) {
             $dates = collect();
             $startDate = Carbon::createFromFormat('Ymd', $this->argument('start'));
-            $endDate = Carbon::createFromFormat('Ymd', $this->argument('end'));  
+            $endDate = Carbon::createFromFormat('Ymd', $this->argument('end'));
 
             while ($startDate <= $endDate) {
                 $dates->push($startDate);
@@ -104,52 +71,98 @@ class ExportDataFromBigQuery extends Command
         return $period;
     }
 
-    private function getAllResultsAndStoreIntoDatabase($start_date)
+    private function getAllResultsAndStoreIntoDatabase()
     {
-        if (BigQuery::dataset(config('bqanalytic.big_query_table_name'))->table('events_'.$start_date->format('Ymd'))->exists()) {
+        $period = $this->getPeriod();
+
+        if (config('bqanalytic.multiple_project')) {
+            $accounts = config('bqanalytic.google.accounts');
+        } else {
+            $accounts = collect(config('bqanalytic.google.accounts'))->filter(function ($account, $key) {
+                return $key == 0;
+            })->toArray();
+        }
+
+        foreach ($accounts as $account) {
+            $BQAnalyticClient = BQAnalyticClientFactory::create([
+                'credential' => $account['credential'],
+                'project' => $account['project'],
+                'auth_cache_store' => $account['auth_cache_store'],
+                'client_options' => $account['client_options']
+            ]);
+
+            if ($period->isEmpty()) {
+                $startDates = collect();
+
+                if (BQTable::where('table_date', Carbon::yesterday()->format('Y-m-d'))->where('dataset', $account['name'])->count() == 0) {
+                    $startDates->push(Carbon::yesterday());
+                }
+
+                foreach (BQTable::where('status', false)->where('dataset', $account['name'])->get() as $failedData) {
+                    $startDates->push($failedData->table_date);
+                }
+
+                foreach ($startDates as $startDate) {
+                    $this->getDataFromBigQuery($BQAnalyticClient, $startDate, $account['dataset'], $account['name']);
+                }
+            } else {
+                foreach ($period as $startDate) {
+                    $this->getDataFromBigQuery($BQAnalyticClient, $startDate, $account['dataset'], $account['name']);
+                }
+            }
+        }
+    }
+
+    private function getDataFromBigQuery($BQAnalyticClient, $start_date, $dataset, $name)
+    {
+        if ($BQAnalyticClient->dataset($dataset)->table('events_' . $start_date->format('Ymd'))->exists()) {
             $query = "
                 SELECT 
                     *
                 FROM 
-                    ".config('bqanalytic.big_query_table_name').".events_".$start_date->format('Ymd')."
+                    " . $dataset . ".events_" . $start_date->format('Ymd') . "
             ";
 
-            $results = collect($this->returnResults($query));
+            $results = collect($this->returnResults($BQAnalyticClient, $query));
 
             foreach ($results->chunk(100) as $result) {
                 foreach ($result as $r) {
-                    config('bqanalytic.bigquery')::create($r);
+                    config('bqanalytic.bigquery')::create(collect($r)->merge([
+                        'dataset' => $dataset
+                    ])->toArray());
                 }
             }
 
             return BQTable::updateOrCreate([
                 'table_date' => $start_date->format('Y-m-d'),
+                'dataset' => $name
             ], [
                 'status' => 1
             ]);
         }
 
-        $this->removeDataWithStartDate($start_date);
+        $this->removeDataWithStartDate($start_date, $dataset);
 
         return BQTable::updateOrCreate([
             'table_date' => $start_date->format('Y-m-d'),
+            'dataset' => $name
         ], [
             'status' => 0
         ]);
     }
 
-    private function removeDataWithStartDate($start_date)
+    private function removeDataWithStartDate($start_date, $dataset)
     {
-        BQData::where('event_date', $start_date)->delete();
+        BQData::where('event_date', $start_date)->where('dataset', $dataset)->delete();
     }
 
-    private function returnResults($query)
+    private function returnResults($BQAnalyticClient, $query)
     {
-        $query = BigQuery::query($query);
-        $rawResults = BigQuery::runQuery($query);
+        $query = $BQAnalyticClient->query($query);
+        $rawResults = $BQAnalyticClient->runQuery($query);
 
         $results = [];
-        
+
         foreach ($rawResults as $key => $row) {
             foreach ($row as $column => $value) {
                 $results[$key][$column] = $value;
