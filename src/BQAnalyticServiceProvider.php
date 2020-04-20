@@ -5,6 +5,7 @@ namespace RezuanKassim\BQAnalytic;
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use RezuanKassim\BQAnalytic\Commands\ExportDataFromBigQuery;
+use RezuanKassim\BQAnalytic\Exceptions\InvalidCredential;
 
 class BQAnalyticServiceProvider extends ServiceProvider
 {
@@ -21,7 +22,7 @@ class BQAnalyticServiceProvider extends ServiceProvider
     {
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'rezuankassim');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'bqanalytic');
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
 
         // Publishing is only necessary when using the CLI.
@@ -37,7 +38,9 @@ class BQAnalyticServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/bqanalytic.php', 'bqanalytic');
+        $this->mergeConfigFrom(__DIR__ . '/../config/bqanalytic.php', 'bqanalytic');
+
+        $bqAnalyticConfig = config('bqanalytic');
 
         // Register the service the package provides.
         $this->app->singleton('bqanalytic', function ($app) {
@@ -54,7 +57,7 @@ class BQAnalyticServiceProvider extends ServiceProvider
     {
         return ['bqanalytic'];
     }
-    
+
     /**
      * Console-specific booting.
      *
@@ -64,11 +67,11 @@ class BQAnalyticServiceProvider extends ServiceProvider
     {
         // Publishing the configuration file.
         $this->publishes([
-            __DIR__.'/../config/bqanalytic.php' => config_path('bqanalytic.php'),
+            __DIR__ . '/../config/bqanalytic.php' => config_path('bqanalytic.php'),
         ], 'bqanalytic.config');
 
         $this->publishes([
-            __DIR__.'/../database/seeds/AnalyticSeeder.php' => database_path('/seeds/AnalyticSeeder.php'),
+            __DIR__ . '/../database/seeds/AnalyticSeeder.php' => database_path('/seeds/AnalyticSeeder.php'),
         ], 'bqanalytic.seeder');
 
         // Publishing the views.
