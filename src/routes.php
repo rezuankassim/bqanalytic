@@ -7,11 +7,6 @@ Route::group([
     'prefix' => 'bqanalytics',
     'middleware' => 'web',
 ], function () {
-<<<<<<< HEAD
     Route::get('/', 'BQAnalyticController@index')->name('bqanalytics.index');
     Route::post('/analytics', 'BQAnalyticController@analytic')->name('bqanalytics.analytic');
 });
-=======
-    Route::get('/', 'BQAnalyticController@index');
-});
->>>>>>> feature/remove_laravel_biquery_package

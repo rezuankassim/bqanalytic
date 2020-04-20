@@ -21,15 +21,9 @@ class BQAnalyticServiceProvider extends ServiceProvider
     public function boot()
     {
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'rezuankassim');
-<<<<<<< HEAD
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'bqanalytic');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadRoutesFrom(__DIR__.'/routes.php');
-=======
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'bqanalytic');
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
->>>>>>> feature/remove_laravel_biquery_package
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {
