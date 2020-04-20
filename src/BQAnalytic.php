@@ -3,7 +3,6 @@
 namespace RezuanKassim\BQAnalytic;
 
 use Illuminate\Support\Facades\DB;
-use SchulzeFelix\BigQuery\BigQueryFacade as BigQuery;
 use PragmaRX\Countries\Package\Countries;
 
 class BQAnalytic
@@ -22,40 +21,49 @@ class BQAnalytic
     public function getAllAnalytics()
     {
         $results = [];
-        
-        if ($this->analytic->contains('name', 'get active users')) {
-            $results['activeUsers'] = $this->getActiveUsers();
+
+        if (config('bqanalytic.multiple_project')) {
+            $accounts = config('bqanalytic.google.accounts');
+        } else {
+            $accounts = collect(config('bqanalytic.google.accounts'))->filter(function ($account, $key) {
+                return $key == 0;
+            })->toArray();
         }
 
-        if ($this->analytic->contains('name', 'get new users')) {
-            $results['newUsers'] = $this->getNewUsers();
+        foreach ($accounts as $account) {
+            if ($this->analytic->contains('name', 'get active users')) {
+                $results[$account['name']]['activeUsers'] = $this->getActiveUsers($account['dataset']);
+            }
+    
+            if ($this->analytic->contains('name', 'get new users')) {
+                $results[$account['name']]['newUsers'] = $this->getNewUsers($account['dataset']);
+            }
+    
+            if ($this->analytic->contains('name', 'get active users by platform')) {
+                $results[$account['name']]['activeUsersByPlatform'] = $this->getActiveUsersByPlatform($account['dataset']);
+            }
+    
+            if ($this->analytic->contains('name', 'get all event name with event count')) {
+                $results[$account['name']]['allEventWithEventCount'] = $this->getAllEventWithEventCount($account['dataset']);
+            }
+    
+            if ($this->analytic->contains('name', 'get users by country')) {
+                $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account['dataset']);
+            }
+    
+            if ($this->analytic->contains('name', 'get total event count by event name')) {
+                $results[$account['name']]['totalEventCountByEventName'] = $this->getTotalEventCountByEventName($account['dataset']);
+            }
+    
+            if ($this->analytic->contains('name', 'get total event count by users')) {
+                $results[$account['name']]['totalEventCountByUsers'] = $this->getTotalEventCountByUsers($account['dataset']);
+            }
         }
-
-        if ($this->analytic->contains('name', 'get active users by platform')) {
-            $results['activeUsersByPlatform'] = $this->getActiveUsersByPlatform();
-        }
-
-        if ($this->analytic->contains('name', 'get all event name with event count')) {
-            $results['allEventWithEventCount'] = $this->getAllEventWithEventCount();
-        }
-
-        if ($this->analytic->contains('name', 'get users by country')) {
-            $results['usersByCountry'] = $this->getUsersByCountry();
-        }
-
-        if ($this->analytic->contains('name', 'get total event count by event name')) {
-            $results['totalEventCountByEventName'] = $this->getTotalEventCountByEventName();
-        }
-
-        if ($this->analytic->contains('name', 'get total event count by users')) {
-            $results['totalEventCountByUsers'] = $this->getTotalEventCountByUsers();
-        }
-
 
         return $results;
     }
 
-    private function getActiveUsers()
+    private function getActiveUsers($dataset)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("COUNT(DISTINCT
@@ -79,12 +87,13 @@ class BQAnalytic
                                     ELSE NULL
                                 END)) AS active_desktop_user_count"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
+            ->where('dataset', $dataset)
             ->get()->toArray()[0];
 
         return $results;
     }
 
-    private function getNewUsers()
+    private function getNewUsers($dataset)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("DATE_FORMAT(STR_TO_DATE(event_date, '%Y%m%d'), '%d/%m/%Y') as date,
@@ -93,13 +102,14 @@ class BQAnalytic
                                     ELSE NULL
                                     END)) AS new_user_count"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
+            ->where('dataset', $dataset)
             ->groupBy('date')->orderBy('date')->get()->toArray();
 
         return $results;
     }
 
-    private function getActiveUsersByPlatform()
-    {  
+    private function getActiveUsersByPlatform($dataset)
+    {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("DATE_FORMAT(STR_TO_DATE(event_date, '%Y%m%d'), '%d/%m/%Y') as date, 
                             COUNT(DISTINCT (CASE
@@ -115,27 +125,30 @@ class BQAnalytic
                                     ELSE NULL
                                     END)) as other_platform"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
+            ->where('dataset', $dataset)
             ->groupBy('date')->orderBy('date')->get()->toArray();
 
         return $results;
     }
 
-    private function getAllEventWithEventCount()
+    private function getAllEventWithEventCount($dataset)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, count(distinct user_pseudo_id) as event_count'))
+            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name')->get()->toArray();
 
         return $results;
     }
 
-    private function getUsersByCountry()
+    private function getUsersByCountry($dataset)
     {
         $countries = (new Countries())->all();
         $endResults = collect();
 
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("count(distinct user_pseudo_id) as user_count, JSON_UNQUOTE(JSON_EXTRACT(geo, '$.country')) as country"))
+            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('country')->get()->toArray();
 
         $results = collect($results)->filter(function ($value) {
@@ -149,19 +162,21 @@ class BQAnalytic
         return $results;
     }
 
-    private function getTotalEventCountByEventName()
+    private function getTotalEventCountByEventName($dataset)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, COUNT(event_name) as event_count'))
+            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name')->get()->toArray();
 
         return $results;
     }
 
-    private function getTotalEventCountByUsers()
+    private function getTotalEventCountByUsers($dataset)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, COUNT(DISTINCT user_pseudo_id) as event_count'))
+            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name')->get()->toArray();
 
         return $results;

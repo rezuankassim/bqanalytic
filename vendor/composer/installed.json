@@ -695,24 +695,25 @@
     },
     {
         "name": "guzzlehttp/guzzle",
-        "version": "6.5.2",
-        "version_normalized": "6.5.2.0",
+        "version": "6.5.3",
+        "version_normalized": "6.5.3.0",
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/guzzle.git",
-            "reference": "43ece0e75098b7ecd8d13918293029e555a50f82"
+            "reference": "aab4ebd862aa7d04f01a4b51849d657db56d882e"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/43ece0e75098b7ecd8d13918293029e555a50f82",
-            "reference": "43ece0e75098b7ecd8d13918293029e555a50f82",
+            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/aab4ebd862aa7d04f01a4b51849d657db56d882e",
+            "reference": "aab4ebd862aa7d04f01a4b51849d657db56d882e",
             "shasum": ""
         },
         "require": {
             "ext-json": "*",
             "guzzlehttp/promises": "^1.0",
             "guzzlehttp/psr7": "^1.6.1",
-            "php": ">=5.5"
+            "php": ">=5.5",
+            "symfony/polyfill-intl-idn": "^1.11"
         },
         "require-dev": {
             "ext-curl": "*",
@@ -720,10 +721,9 @@
             "psr/log": "^1.1"
         },
         "suggest": {
-            "ext-intl": "Required for Internationalized Domain Name (IDN) support",
             "psr/log": "Required for using the Log middleware"
         },
-        "time": "2019-12-23T11:57:10+00:00",
+        "time": "2020-04-18T10:38:46+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -940,17 +940,17 @@
     },
     {
         "name": "laravel/framework",
-        "version": "v5.8.37",
-        "version_normalized": "5.8.37.0",
+        "version": "v5.8.38",
+        "version_normalized": "5.8.38.0",
         "source": {
             "type": "git",
             "url": "https://github.com/laravel/framework.git",
-            "reference": "ce08aaee3a0b8bb58b459b2decf7f25ba7b10fa4"
+            "reference": "78eb4dabcc03e189620c16f436358d41d31ae11f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/laravel/framework/zipball/ce08aaee3a0b8bb58b459b2decf7f25ba7b10fa4",
-            "reference": "ce08aaee3a0b8bb58b459b2decf7f25ba7b10fa4",
+            "url": "https://api.github.com/repos/laravel/framework/zipball/78eb4dabcc03e189620c16f436358d41d31ae11f",
+            "reference": "78eb4dabcc03e189620c16f436358d41d31ae11f",
             "shasum": ""
         },
         "require": {
@@ -1054,7 +1054,7 @@
             "symfony/psr-http-message-bridge": "Required to use PSR-7 bridging features (^1.1).",
             "wildbit/swiftmailer-postmark": "Required to use Postmark mail driver (^3.0)."
         },
-        "time": "2020-02-14T14:29:11+00:00",
+        "time": "2020-04-14T14:14:36+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -1090,17 +1090,17 @@
     },
     {
         "name": "league/flysystem",
-        "version": "1.0.66",
-        "version_normalized": "1.0.66.0",
+        "version": "1.0.67",
+        "version_normalized": "1.0.67.0",
         "source": {
             "type": "git",
             "url": "https://github.com/thephpleague/flysystem.git",
-            "reference": "021569195e15f8209b1c4bebb78bd66aa4f08c21"
+            "reference": "5b1f36c75c4bdde981294c2a0ebdb437ee6f275e"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/021569195e15f8209b1c4bebb78bd66aa4f08c21",
-            "reference": "021569195e15f8209b1c4bebb78bd66aa4f08c21",
+            "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/5b1f36c75c4bdde981294c2a0ebdb437ee6f275e",
+            "reference": "5b1f36c75c4bdde981294c2a0ebdb437ee6f275e",
             "shasum": ""
         },
         "require": {
@@ -1130,7 +1130,7 @@
             "spatie/flysystem-dropbox": "Allows you to use Dropbox storage",
             "srmklive/flysystem-dropbox-v2": "Allows you to use Dropbox storage for PHP 5 applications"
         },
-        "time": "2020-03-17T18:58:12+00:00",
+        "time": "2020-04-16T13:21:26+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -1172,62 +1172,6 @@
             "s3",
             "sftp",
             "storage"
-        ],
-        "funding": [
-            {
-                "url": "https://offset.earth/frankdejonge",
-                "type": "other"
-            }
-        ]
-    },
-    {
-        "name": "madewithlove/illuminate-psr-cache-bridge",
-        "version": "1.0.3",
-        "version_normalized": "1.0.3.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/madewithlove/illuminate-psr-cache-bridge.git",
-            "reference": "489c6cd856b133edf986387712922c0dc2223d26"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/madewithlove/illuminate-psr-cache-bridge/zipball/489c6cd856b133edf986387712922c0dc2223d26",
-            "reference": "489c6cd856b133edf986387712922c0dc2223d26",
-            "shasum": ""
-        },
-        "require": {
-            "illuminate/contracts": "^5.0",
-            "php": ">=5.6.0",
-            "psr/cache": "^1.0"
-        },
-        "provide": {
-            "psr/cache-implementation": "1.0.0"
-        },
-        "require-dev": {
-            "cache/integration-tests": "^0.16.0",
-            "illuminate/cache": "^5.0",
-            "nesbot/carbon": "^1.3.0",
-            "phpunit/phpunit": "^4.8"
-        },
-        "time": "2019-07-01T06:39:22+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "Madewithlove\\IlluminatePsrCacheBridge\\": "src/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "keywords": [
-            "Bridge",
-            "adapter",
-            "cache",
-            "implementation",
-            "laravel",
-            "psr-6"
         ]
     },
     {
@@ -3442,67 +3386,6 @@
             "RFC 6570",
             "template",
             "uri"
-        ]
-    },
-    {
-        "name": "schulzefelix/laravel-bigquery",
-        "version": "1.1.2",
-        "version_normalized": "1.1.2.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/schulzefelix/laravel-bigquery.git",
-            "reference": "5bea414e5b8f432bff89bc69de4c0198f7c5c2f4"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/schulzefelix/laravel-bigquery/zipball/5bea414e5b8f432bff89bc69de4c0198f7c5c2f4",
-            "reference": "5bea414e5b8f432bff89bc69de4c0198f7c5c2f4",
-            "shasum": ""
-        },
-        "require": {
-            "google/cloud-bigquery": "^1.0.0",
-            "illuminate/support": "~5.5.0|~5.6.0|~5.7.0|~5.8.0",
-            "madewithlove/illuminate-psr-cache-bridge": "^1.0",
-            "php": ">=7.0.0"
-        },
-        "require-dev": {
-            "mockery/mockery": "^1.0",
-            "orchestra/testbench": "~3.5.0|~3.6.0",
-            "phpunit/phpunit": "^6.2|^7.0"
-        },
-        "time": "2019-09-15T14:35:36+00:00",
-        "type": "library",
-        "extra": {
-            "laravel": {
-                "providers": [
-                    "SchulzeFelix\\BigQuery\\BigQueryServiceProvider"
-                ],
-                "aliases": {
-                    "BigQuery": "SchulzeFelix\\BigQuery\\BigQueryFacade"
-                }
-            }
-        },
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "SchulzeFelix\\BigQuery\\": "src"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Felix Schulze",
-                "email": "github@schulze.co",
-                "homepage": "https://schulze.co",
-                "role": "Developer"
-            }
-        ],
-        "homepage": "https://github.com/schulzefelix/laravel-bigquery",
-        "keywords": [
-            "laravel"
         ]
     },
     {

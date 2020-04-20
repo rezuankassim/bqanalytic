@@ -13,6 +13,7 @@ class BQAnalyticController extends Controller
     {
         return view('bqanalytic::bqanalytics.index');
     }
+<<<<<<< HEAD
 
     public function analytic(Request $request)
     {
@@ -23,3 +24,6 @@ class BQAnalyticController extends Controller
         return $results;
     }
 }
+=======
+}
+>>>>>>> feature/remove_laravel_biquery_package

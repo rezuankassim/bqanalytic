@@ -24,7 +24,7 @@ class BQData extends Model
         'traffic_source' => 'array',
         'event_dimensions' => 'array',
         'ecommerce' => 'array',
-        'items' => 'array'
+        'items' => 'array',
     ];
 
     public $timestamps = false;
