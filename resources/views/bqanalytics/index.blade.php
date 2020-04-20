@@ -176,7 +176,7 @@
                     'range': $('#date').val()
                 },
                 success: function (response) {
-                    setData(response)
+                    setData(response.QMS)
                 } 
             })
         }
