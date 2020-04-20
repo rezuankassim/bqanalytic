@@ -2,6 +2,7 @@
 
 namespace RezuanKassim\BQAnalytic;
 
+use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use RezuanKassim\BQAnalytic\Commands\ExportDataFromBigQuery;
 
@@ -40,7 +41,7 @@ class BQAnalyticServiceProvider extends ServiceProvider
 
         // Register the service the package provides.
         $this->app->singleton('bqanalytic', function ($app) {
-            return new BQAnalytic;
+            return new BQAnalytic(auth()->user(), Carbon::yesterday()->format('Ymd'), Carbon::yesterday()->format('Ymd'));
         });
     }
 
