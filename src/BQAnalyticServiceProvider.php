@@ -5,7 +5,6 @@ namespace RezuanKassim\BQAnalytic;
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use RezuanKassim\BQAnalytic\Commands\ExportDataFromBigQuery;
-use RezuanKassim\BQAnalytic\Exceptions\InvalidCredential;
 
 class BQAnalyticServiceProvider extends ServiceProvider
 {

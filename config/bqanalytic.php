@@ -38,7 +38,7 @@ return [
      */
     'bigquery_dataset_array' => explode(',', env('BQANALYTIC_BQ_TABLE_NAME_ARRAY')),
 
-    
+
     'google' => [
         /**
          *  Google accounts
