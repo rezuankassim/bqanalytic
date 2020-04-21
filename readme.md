@@ -24,10 +24,11 @@ $ php artisan vendor:publish RezuanKassim/BQAnalytic/BQAnalyticServiceProvider
 
 In your .env file, make sure you have these value setup
 
-``` bash
+```
 GOOGLE_CLOUD_APPLICATION_CREDENTIALS=path_to_your_credentials_file
 GOOGLE_CLOUD_PROJECT_ID=your_google_cloud_project_id
 BQANALYTIC_BQ_TABLE_NAME=your_bigquery_datasets_name
+GOOGLE_CLOUD_APPLICATION_NAME=your_google_cloud_application_name
 ```
 
 After that
@@ -39,6 +40,56 @@ $ php artisan db:seed --class=AnalyticSeeder
 If you an error popup when running the command above, you need to publish the vendor file.
 
 ## Usage
+
+Include this code into your user entity
+
+``` php
+use RezuanKassim\BQAnalytic\Traits\hasAnalyticPreferences;
+
+....
+
+class User extends Authenticatable
+{
+    use Notifiable, hasAnalyticPreferences;
+```
+
+Then run ```php artisan bqanalytic:export``` to export big query data into your local database
+
+Note that:  ```php artisan bqanalytic:export``` can receive two date which is start date and end date behind it like ```php artisan bqanalytic:export 20200420 20200420```
+
+Next, in your controller
+
+``` php
+use RezuanKassim\BQAnalytic\BQAnalytic;
+
+...
+
+$results = (new BQAnalytic(auth()->user(), Carbon::createFromFormat('d/m/Y', $range[0])->format('Ymd'), Carbon::createFromFormat('d/m/Y', $range[1])->format('Ymd')))->getAllAnalytics()[config('bqanalytic.google.accounts')[0]['name']];
+```
+
+Optionally you can enable multiple project by 
+
+```
+BQANALYTIC_MULTIPLE_PROJECTS=true
+```
+
+setting this variable in your env and publishing the config file
+
+and insert the code below in ```google => [accounts => [here]] ```
+
+``` php
+    [
+        'name' => 'YOUR_PROJECT_NAME',
+        'credential' => "FULL_PATH_TO_YOUR_CREDENTIALS",
+        'project' => 'PROJECT_ID',
+        'auth_cache_store' => 'file',
+        'client_options' => [
+            'retries' => 3, // Default
+        ],
+        'dataset' => 'YOUR_DATASET_NAME'
+    ]
+```
+
 
 ## Change log
 
