@@ -31,6 +31,13 @@ BQANALYTIC_BQ_TABLE_NAME=your_bigquery_datasets_name
 GOOGLE_CLOUD_APPLICATION_NAME=your_google_cloud_application_name
 ```
 
+Then 
+
+``` bash
+$ php artisan migrate
+```
+
+
 After that
 
 ``` bash
