@@ -34,27 +34,27 @@ class BQAnalytic
             if ($this->analytic->contains('name', 'get active users')) {
                 $results[$account['name']]['activeUsers'] = $this->getActiveUsers($account['dataset']);
             }
-    
+
             if ($this->analytic->contains('name', 'get new users')) {
                 $results[$account['name']]['newUsers'] = $this->getNewUsers($account['dataset']);
             }
-    
+
             if ($this->analytic->contains('name', 'get active users by platform')) {
                 $results[$account['name']]['activeUsersByPlatform'] = $this->getActiveUsersByPlatform($account['dataset']);
             }
-    
+
             if ($this->analytic->contains('name', 'get all event name with event count')) {
                 $results[$account['name']]['allEventWithEventCount'] = $this->getAllEventWithEventCount($account['dataset']);
             }
-    
+
             if ($this->analytic->contains('name', 'get users by country')) {
                 $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account['dataset']);
             }
-    
+
             if ($this->analytic->contains('name', 'get total event count by event name')) {
                 $results[$account['name']]['totalEventCountByEventName'] = $this->getTotalEventCountByEventName($account['dataset']);
             }
-    
+
             if ($this->analytic->contains('name', 'get total event count by users')) {
                 $results[$account['name']]['totalEventCountByUsers'] = $this->getTotalEventCountByUsers($account['dataset']);
             }
