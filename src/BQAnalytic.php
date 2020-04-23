@@ -2,6 +2,7 @@
 
 namespace RezuanKassim\BQAnalytic;
 
+use App\Client;
 use Illuminate\Support\Facades\DB;
 use PragmaRX\Countries\Package\Countries;
 
@@ -10,12 +11,21 @@ class BQAnalytic
     private $start_date;
     private $end_date;
     private $analytic;
+    private $client = '';
 
-    public function __construct($user, $start_date, $end_date)
+    public function __construct($user, $start_date, $end_date, $client = '')
     {
         $this->start_date = $start_date;
         $this->end_date = $end_date;
         $this->analytic = $user->analytic ?? collect([]);
+        $this->client = $client;
+    }
+
+    public function setOption(array $options)
+    {
+        $this->start_date = $options['start_date'];
+        $this->end_date = $options['end_date'];
+        $this->client = $options['client'];
     }
 
     public function getAllAnalytics()
@@ -60,7 +70,7 @@ class BQAnalytic
     private function getClients()
     {
         if (config('bqanalytic.client_from_db')) {
-            $accounts = config('bqanalytic.client')::where('status', 1)->get()->toArray();
+            $accounts = config('bqanalytic.client')::where('name', $this->client)->where('status', 1)->get()->toArray();
         } else {
             $accounts = config('bqanalytic.google.accounts');
         }
