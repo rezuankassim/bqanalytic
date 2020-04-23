@@ -49,6 +49,7 @@ class ExportDataFromBigQuery extends Command
             $accounts = config('bqanalytic.google.accounts');
         }
 
+        dd($accounts);
         return $accounts;
     }
 

@@ -87,14 +87,47 @@ and insert the code below in ```google => [accounts => [here]] ```
 ``` php
     [
         'name' => 'YOUR_PROJECT_NAME',
-        'credential' => "FULL_PATH_TO_YOUR_CREDENTIALS",
-        'project' => 'PROJECT_ID',
-        'auth_cache_store' => 'file',
-        'client_options' => [
-            'retries' => 3, // Default
-        ],
-        'dataset' => 'YOUR_DATASET_NAME'
+        'google_credential' => "FULL_PATH_TO_YOUR_CREDENTIALS",
+        'google_project_id' => 'PROJECT_ID',
+        'google_bq_dataset_name' => 'YOUR_DATASET_NAME'
     ]
+```
+
+By version 1.3, you are able to store all the clients in the database if you wish
+
+```
+BQANALYTIC_CLIENT_FROM_DB=true
+```
+in .env file
+
+This will use an included ``` RezuanKassim\BQAnalytic\BQClient ``` model to store the clients information
+
+Optionally you also can use own model by including
+
+```
+BQANALYTIC_CLIENT_MODEL=App\Client
+```
+in .env file
+
+But remember to include these codes in your client model
+
+``` php
+use RezuanKassim\BQAnalytic\Traits\hasClientFromDB;
+
+...
+
+class Client extends Model
+{
+    use hasClientFromDB;
+
+    protected $table = 'bq_clients';
+
+    protected $guarded = ['created_at', 'updated_at', 'id'];
+
+    protected $casts = [
+        'status' => 'boolean'
+    ];
+}
 ```
 
 
