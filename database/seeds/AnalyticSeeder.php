@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use RezuanKassim\BQAnalytic\Analytic;
 
 class AnalyticSeeder extends Seeder
 {
@@ -39,6 +40,18 @@ class AnalyticSeeder extends Seeder
             'name' => 'get total event count by users'
         ]);
 
-        config('bqanalytic.user')::find(1)->analytic()->sync(config('bqanalytic.analytic')::all()->pluck('id'));
+        $user = config('bqanalytic.user')::find(1);
+
+        if (config('bqanalytic.client_from_db')) {
+            $accounts = config('bqanalytic.client')::where('status', 1)->get()->toArray();
+        } else {
+            $accounts = config('bqanalytic.google.accounts');
+        }
+
+        foreach ($accounts as $account) {
+            $user->analytic()->sync(Analytic::all()->pluck('id')->mapWithKeys(function ($value) use ($account) {
+                return [ $value => ['client_name' => $account['name']]];
+            }));
+        }
     }
 }
