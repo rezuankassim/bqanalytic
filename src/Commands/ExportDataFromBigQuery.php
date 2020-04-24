@@ -52,7 +52,7 @@ class ExportDataFromBigQuery extends Command
         return $accounts;
     }
 
-    private function getPeriod()
+    private function getPeriod($name)
     {
         $period = collect([]);
 
@@ -74,8 +74,8 @@ class ExportDataFromBigQuery extends Command
                 $startDate = Carbon::parse($startDate)->addDay();
             }
 
-            $period = $dates->filter(function ($date) {
-                return BQTable::where('table_date', $date->format('Y-m-d'))->where('status', 1)->count() == 0;
+            $period = $dates->filter(function ($date) use ($name) {
+                return BQTable::where('table_date', $date->format('Y-m-d'))->where('dataset', $name)->where('status', 1)->count() == 0;
             });
         }
 
@@ -84,11 +84,11 @@ class ExportDataFromBigQuery extends Command
 
     private function getAllResultsAndStoreIntoDatabase()
     {
-        $period = $this->getPeriod();
-
         $accounts = $this->getClients();
 
         foreach ($accounts as $account) {
+            $period = $this->getPeriod($account['name']);
+
             $BQAnalyticClient = BQAnalyticClientFactory::create([
                 'credential' => storage_path('app/'.$account['google_credential']),
                 'project' => $account['google_project_id'],
