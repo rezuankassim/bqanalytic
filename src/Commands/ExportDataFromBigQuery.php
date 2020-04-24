@@ -41,6 +41,17 @@ class ExportDataFromBigQuery extends Command
         $this->getAllResultsAndStoreIntoDatabase();
     }
 
+    private function getClients()
+    {
+        if (config('bqanalytic.client_from_db')) {
+            $accounts = config('bqanalytic.client')::where('status', 1)->get()->toArray();
+        } else {
+            $accounts = config('bqanalytic.google.accounts');
+        }
+
+        return $accounts;
+    }
+
     private function getPeriod()
     {
         $period = collect([]);
@@ -75,20 +86,14 @@ class ExportDataFromBigQuery extends Command
     {
         $period = $this->getPeriod();
 
-        if (config('bqanalytic.multiple_project')) {
-            $accounts = config('bqanalytic.google.accounts');
-        } else {
-            $accounts = collect(config('bqanalytic.google.accounts'))->filter(function ($account, $key) {
-                return $key == 0;
-            })->toArray();
-        }
+        $accounts = $this->getClients();
 
         foreach ($accounts as $account) {
             $BQAnalyticClient = BQAnalyticClientFactory::create([
-                'credential' => $account['credential'],
-                'project' => $account['project'],
-                'auth_cache_store' => $account['auth_cache_store'],
-                'client_options' => $account['client_options']
+                'credential' => storage_path('app/'.$account['google_credential']),
+                'project' => $account['google_project_id'],
+                'auth_cache_store' => 'file',
+                'client_options' => ['retries' => 3]
             ]);
 
             if ($period->isEmpty()) {
@@ -103,11 +108,11 @@ class ExportDataFromBigQuery extends Command
                 }
 
                 foreach ($startDates as $startDate) {
-                    $this->getDataFromBigQuery($BQAnalyticClient, $startDate, $account['dataset'], $account['name']);
+                    $this->getDataFromBigQuery($BQAnalyticClient, $startDate, $account['google_bq_dataset_name'], $account['name']);
                 }
             } else {
                 foreach ($period as $startDate) {
-                    $this->getDataFromBigQuery($BQAnalyticClient, $startDate, $account['dataset'], $account['name']);
+                    $this->getDataFromBigQuery($BQAnalyticClient, $startDate, $account['google_bq_dataset_name'], $account['name']);
                 }
             }
         }

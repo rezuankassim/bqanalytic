@@ -2,6 +2,7 @@
 
 namespace RezuanKassim\BQAnalytic;
 
+use App\Client;
 use Illuminate\Support\Facades\DB;
 use PragmaRX\Countries\Package\Countries;
 
@@ -10,57 +11,71 @@ class BQAnalytic
     private $start_date;
     private $end_date;
     private $analytic;
+    private $client = '';
 
-    public function __construct($user, $start_date, $end_date)
+    public function __construct($user, $start_date, $end_date, $client = '')
     {
         $this->start_date = $start_date;
         $this->end_date = $end_date;
         $this->analytic = $user->analytic ?? collect([]);
+        $this->client = $client;
+    }
+
+    public function setOption(array $options)
+    {
+        $this->start_date = $options['start_date'];
+        $this->end_date = $options['end_date'];
+        $this->client = $options['client'];
     }
 
     public function getAllAnalytics()
     {
         $results = [];
 
-        if (config('bqanalytic.multiple_project')) {
-            $accounts = config('bqanalytic.google.accounts');
-        } else {
-            $accounts = collect(config('bqanalytic.google.accounts'))->filter(function ($account, $key) {
-                return $key == 0;
-            })->toArray();
-        }
+        $accounts = $this->getClients();
 
         foreach ($accounts as $account) {
             if ($this->analytic->contains('name', 'get active users')) {
-                $results[$account['name']]['activeUsers'] = $this->getActiveUsers($account['dataset']);
+                $results[$account['name']]['activeUsers'] = $this->getActiveUsers($account['google_bq_dataset_name']);
             }
 
             if ($this->analytic->contains('name', 'get new users')) {
-                $results[$account['name']]['newUsers'] = $this->getNewUsers($account['dataset']);
+                $results[$account['name']]['newUsers'] = $this->getNewUsers($account['google_bq_dataset_name']);
             }
 
             if ($this->analytic->contains('name', 'get active users by platform')) {
-                $results[$account['name']]['activeUsersByPlatform'] = $this->getActiveUsersByPlatform($account['dataset']);
+                $results[$account['name']]['activeUsersByPlatform'] = $this->getActiveUsersByPlatform($account['google_bq_dataset_name']);
             }
 
             if ($this->analytic->contains('name', 'get all event name with event count')) {
-                $results[$account['name']]['allEventWithEventCount'] = $this->getAllEventWithEventCount($account['dataset']);
+                $results[$account['name']]['allEventWithEventCount'] = $this->getAllEventWithEventCount($account['google_bq_dataset_name']);
             }
 
             if ($this->analytic->contains('name', 'get users by country')) {
-                $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account['dataset']);
+                $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account['google_bq_dataset_name']);
             }
 
             if ($this->analytic->contains('name', 'get total event count by event name')) {
-                $results[$account['name']]['totalEventCountByEventName'] = $this->getTotalEventCountByEventName($account['dataset']);
+                $results[$account['name']]['totalEventCountByEventName'] = $this->getTotalEventCountByEventName($account['google_bq_dataset_name']);
             }
 
             if ($this->analytic->contains('name', 'get total event count by users')) {
-                $results[$account['name']]['totalEventCountByUsers'] = $this->getTotalEventCountByUsers($account['dataset']);
+                $results[$account['name']]['totalEventCountByUsers'] = $this->getTotalEventCountByUsers($account['google_bq_dataset_name']);
             }
         }
 
         return $results;
+    }
+
+    private function getClients()
+    {
+        if (config('bqanalytic.client_from_db')) {
+            $accounts = config('bqanalytic.client')::where('name', $this->client)->where('status', 1)->get()->toArray();
+        } else {
+            $accounts = config('bqanalytic.google.accounts');
+        }
+
+        return $accounts;
     }
 
     private function getActiveUsers($dataset)

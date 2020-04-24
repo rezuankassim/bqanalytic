@@ -46,25 +46,14 @@ return [
         'accounts' => [
             [
                 'name' => env('GOOGLE_CLOUD_APPLICATION_NAME'),
-                'credential' => env('GOOGLE_CLOUD_APPLICATION_CREDENTIALS', ''),
-                'project' => env('GOOGLE_CLOUD_PROJECT_ID', ''),
-                'auth_cache_store' => 'file',
-                'client_options' => [
-                    'retries' => 3, // Default
-                ],
-                'dataset' => env('BQANALYTIC_BQ_TABLE_NAME', '')
+                'google_credential' => env('GOOGLE_CLOUD_APPLICATION_CREDENTIALS', ''),
+                'google_project_id' => env('GOOGLE_CLOUD_PROJECT_ID', ''),
+                'google_bq_dataset_name' => env('BQANALYTIC_BQ_TABLE_NAME', '')
             ]
-            // [
-            //     'name' => 'Sime Darby',
-            //     'credential' => "/Users/rezuankassim/projects/bqanalytic/storage/app/analytics/sime-darby-4a39062f4c50.json",
-            //     'project' => 'sime-darby',
-            //     'auth_cache_store' => 'file',
-            //     'client_options' => [
-            //         'retries' => 3, // Default
-            //     ],
-            //     'dataset' => 'analytics_180573853'
-            // ]
         ]
+    ],
 
-    ]
+    'client_from_db' => env('BQANALYTIC_CLIENT_FROM_DB', false),
+
+    'client' => env('BQANALYTIC_CLIENT_MODEL', \RezuanKassim\BQAnalytic\BQClient::class),
 ];
