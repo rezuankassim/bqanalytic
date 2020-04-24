@@ -35,6 +35,8 @@ class BQAnalytic
         $accounts = $this->getClients();
 
         foreach ($accounts as $account) {
+            $results[$account['name']] = [];
+
             if ($this->analytic->contains('name', 'get active users')) {
                 $results[$account['name']]['activeUsers'] = $this->getActiveUsers($account['google_bq_dataset_name']);
             }
