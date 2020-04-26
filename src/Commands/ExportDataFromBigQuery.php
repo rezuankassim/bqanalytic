@@ -4,6 +4,7 @@ namespace RezuanKassim\BQAnalytic\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use RezuanKassim\BQAnalytic\Actions\GetClient;
 use RezuanKassim\BQAnalytic\BQAnalyticClientFactory;
 use RezuanKassim\BQAnalytic\BQData;
 use RezuanKassim\BQAnalytic\BQTable;
@@ -39,17 +40,6 @@ class ExportDataFromBigQuery extends Command
     public function handle()
     {
         $this->getAllResultsAndStoreIntoDatabase();
-    }
-
-    private function getClients()
-    {
-        if (config('bqanalytic.client_from_db')) {
-            $accounts = config('bqanalytic.client')::where('status', 1)->get()->toArray();
-        } else {
-            $accounts = config('bqanalytic.google.accounts');
-        }
-
-        return $accounts;
     }
 
     private function getPeriod($name)
@@ -90,7 +80,7 @@ class ExportDataFromBigQuery extends Command
 
     private function getAllResultsAndStoreIntoDatabase()
     {
-        $accounts = $this->getClients();
+        $accounts = (new GetClient())->execute(config('bqanalytic.client_from_db'));
 
         foreach ($accounts as $account) {
             $period = $this->getPeriod($account['name']);
