@@ -67,10 +67,10 @@ class ExportDataFromBigQuery extends Command
             $period = $dates->filter(function ($date) use ($name) {
                 return BQTable::where('table_date', $date->format('Y-m-d'))->where('dataset', $name)->where('status', 1)->count() == 0;
             });
-            
+
             if ($period->isEmpty()) {
                 $this->error('An error has occurred!');
-                
+
                 exit();
             }
         }
@@ -86,7 +86,7 @@ class ExportDataFromBigQuery extends Command
             $period = $this->getPeriod($account['name']);
 
             $BQAnalyticClient = BQAnalyticClientFactory::create([
-                'credential' => storage_path('app/'.$account['google_credential']),
+                'credential' => storage_path('app/' . $account['google_credential']),
                 'project' => $account['google_project_id'],
                 'auth_cache_store' => 'file',
                 'client_options' => ['retries' => 3]

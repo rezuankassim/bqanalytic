@@ -9,8 +9,8 @@ trait hasClientFromDB
     protected static function booted()
     {
         static::deleted(function ($client) {
-            if (File::exists(storage_path('app/'.$client->google_credential))) {
-                File::delete(storage_path('app/'.$client->google_credential));
+            if (File::exists(storage_path('app/' . $client->google_credential))) {
+                File::delete(storage_path('app/' . $client->google_credential));
             }
         });
     }

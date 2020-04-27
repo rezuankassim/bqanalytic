@@ -24,7 +24,7 @@ class BQAnalyticTest extends TestCase
         ]);
 
         $accounts = (new GetClient())->execute(config('bqanalytic.client_from_db'));
-        
+
         $this->assertContains([
             'name' => 'testing',
             'google_credential' => 'testing_credential',
