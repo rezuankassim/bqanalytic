@@ -4,6 +4,7 @@ namespace RezuanKassim\BQAnalytic\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use RezuanKassim\BQAnalytic\Actions\GetClient;
 use RezuanKassim\BQAnalytic\BQAnalyticClientFactory;
 use RezuanKassim\BQAnalytic\BQData;
 use RezuanKassim\BQAnalytic\BQTable;
@@ -41,18 +42,7 @@ class ExportDataFromBigQuery extends Command
         $this->getAllResultsAndStoreIntoDatabase();
     }
 
-    private function getClients()
-    {
-        if (config('bqanalytic.client_from_db')) {
-            $accounts = config('bqanalytic.client')::where('status', 1)->get()->toArray();
-        } else {
-            $accounts = config('bqanalytic.google.accounts');
-        }
-
-        return $accounts;
-    }
-
-    private function getPeriod()
+    private function getPeriod($name)
     {
         $period = collect([]);
 
@@ -74,9 +64,15 @@ class ExportDataFromBigQuery extends Command
                 $startDate = Carbon::parse($startDate)->addDay();
             }
 
-            $period = $dates->filter(function ($date) {
-                return BQTable::where('table_date', $date->format('Y-m-d'))->where('status', 1)->count() == 0;
+            $period = $dates->filter(function ($date) use ($name) {
+                return BQTable::where('table_date', $date->format('Y-m-d'))->where('dataset', $name)->where('status', 1)->count() == 0;
             });
+            
+            if ($period->isEmpty()) {
+                $this->error('An error has occurred!');
+                
+                exit();
+            }
         }
 
         return $period;
@@ -84,11 +80,11 @@ class ExportDataFromBigQuery extends Command
 
     private function getAllResultsAndStoreIntoDatabase()
     {
-        $period = $this->getPeriod();
-
-        $accounts = $this->getClients();
+        $accounts = (new GetClient())->execute(config('bqanalytic.client_from_db'));
 
         foreach ($accounts as $account) {
+            $period = $this->getPeriod($account['name']);
+
             $BQAnalyticClient = BQAnalyticClientFactory::create([
                 'credential' => storage_path('app/'.$account['google_credential']),
                 'project' => $account['google_project_id'],

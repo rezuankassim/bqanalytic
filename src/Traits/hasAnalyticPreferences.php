@@ -11,6 +11,6 @@ trait hasAnalyticPreferences
             'analytic_user',
             'user_id',
             'analytic_id'
-        );
+        )->withPivot('client_name');
     }
 }
