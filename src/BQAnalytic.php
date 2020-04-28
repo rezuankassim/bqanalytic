@@ -13,11 +13,11 @@ class BQAnalytic
     private $client;
     private $subclient;
 
-    public function __construct($user, $start_date, $end_date, $client = '', $subclient = '')
+    public function __construct($user, $start_date, $end_date, $client = null, $subclient = null, $filterableType = null, $filterableId = null)
     {
         $this->start_date = $start_date;
         $this->end_date = $end_date;
-        $this->analytic = $user->analytic ?? collect([]);
+        $this->analytic = $user->analyticPreferences()->where('filterable_type', $filterableType)->where('filterable_id', $filterableId)->get()->pluck('analytic') ?? collect([]);
         $this->client = $client;
         $this->subclient = $subclient;
     }
@@ -154,7 +154,7 @@ class BQAnalytic
             ->groupBy('date')->orderBy('date');
 
         if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", [$this->subclient]);
         }
 
 

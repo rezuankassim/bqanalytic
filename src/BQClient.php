@@ -28,4 +28,9 @@ class BQClient extends Model
     {
         return $this->hasMany(config('bqanalytic.subclient'), 'client_id');
     }
+
+    public function analyticPreferences()
+    {
+        return $this->morphMany(config('bqanalytic.analyticPreferences'), 'filterable');
+    }
 }
