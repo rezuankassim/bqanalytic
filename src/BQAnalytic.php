@@ -2,7 +2,6 @@
 
 namespace RezuanKassim\BQAnalytic;
 
-use App\Client;
 use Illuminate\Support\Facades\DB;
 use PragmaRX\Countries\Package\Countries;
 
@@ -11,14 +10,16 @@ class BQAnalytic
     private $start_date;
     private $end_date;
     private $analytic;
-    private $client = '';
+    private $client;
+    private $subclient;
 
-    public function __construct($user, $start_date, $end_date, $client = '')
+    public function __construct($user, $start_date, $end_date, $client = null, $subclient = null, $filterableType = null, $filterableId = null)
     {
         $this->start_date = $start_date;
         $this->end_date = $end_date;
-        $this->analytic = $user->analytic ?? collect([]);
+        $this->analytic = $user->analyticPreferences()->where('filterable_type', $filterableType)->where('filterable_id', $filterableId)->get()->pluck('analytic') ?? collect([]);
         $this->client = $client;
+        $this->subclient = $subclient;
     }
 
     public function setOption(array $options)
@@ -104,10 +105,13 @@ class BQAnalytic
                                     ELSE NULL
                                 END)) AS active_desktop_user_count"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
-            ->where('dataset', $dataset)
-            ->get()->toArray()[0];
+            ->where('dataset', $dataset);
 
-        return $results;
+        if ($this->subclient) {
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        }
+
+        return $results->get()->toArray()[0];
     }
 
     private function getNewUsers($dataset)
@@ -120,9 +124,13 @@ class BQAnalytic
                                     END)) AS new_user_count"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
             ->where('dataset', $dataset)
-            ->groupBy('date')->orderBy('date')->get()->toArray();
+            ->groupBy('date')->orderBy('date');
 
-        return $results;
+        if ($this->subclient) {
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        }
+
+        return $results->get()->toArray();
     }
 
     private function getActiveUsersByPlatform($dataset)
@@ -143,9 +151,14 @@ class BQAnalytic
                                     END)) as other_platform"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
             ->where('dataset', $dataset)
-            ->groupBy('date')->orderBy('date')->get()->toArray();
+            ->groupBy('date')->orderBy('date');
 
-        return $results;
+        if ($this->subclient) {
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", [$this->subclient]);
+        }
+
+
+        return $results->get()->toArray();
     }
 
     private function getAllEventWithEventCount($dataset)
@@ -153,9 +166,13 @@ class BQAnalytic
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, count(distinct user_pseudo_id) as event_count'))
             ->where('dataset', $dataset)
-            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name')->get()->toArray();
+            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name');
 
-        return $results;
+        if ($this->subclient) {
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        }
+
+        return $results->get()->toArray();
     }
 
     private function getUsersByCountry($dataset)
@@ -166,7 +183,13 @@ class BQAnalytic
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("count(distinct user_pseudo_id) as user_count, JSON_UNQUOTE(JSON_EXTRACT(geo, '$.country')) as country"))
             ->where('dataset', $dataset)
-            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('country')->get()->toArray();
+            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('country');
+
+        if ($this->subclient) {
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        }
+
+        $results = $results->get()->toArray();
 
         $results = collect($results)->filter(function ($value) {
             return $value['country'] != null;
@@ -184,9 +207,13 @@ class BQAnalytic
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, COUNT(event_name) as event_count'))
             ->where('dataset', $dataset)
-            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name')->get()->toArray();
+            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name');
 
-        return $results;
+        if ($this->subclient) {
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        }
+
+        return $results->get()->toArray();
     }
 
     private function getTotalEventCountByUsers($dataset)
@@ -194,8 +221,12 @@ class BQAnalytic
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, COUNT(DISTINCT user_pseudo_id) as event_count'))
             ->where('dataset', $dataset)
-            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name')->get()->toArray();
+            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name');
 
-        return $results;
+        if ($this->subclient) {
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        }
+
+        return $results->get()->toArray();
     }
 }

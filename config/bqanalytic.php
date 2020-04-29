@@ -56,4 +56,8 @@ return [
     'client_from_db' => env('BQANALYTIC_CLIENT_FROM_DB', false),
 
     'client' => env('BQANALYTIC_CLIENT_MODEL', \RezuanKassim\BQAnalytic\BQClient::class),
+
+    'subclient' => env('BQANALYTIC_SUBCLIENT_MODEL', \RezuanKassim\BQAnalytic\BQSubclient::class),
+
+    'analyticPreferences' => env('BQANALYTIC_ANALYTICUSER_MODEL', \RezuanKassim\BQAnalytic\AnalyticPreference::class)
 ];

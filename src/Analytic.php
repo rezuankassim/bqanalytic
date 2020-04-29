@@ -8,13 +8,8 @@ class Analytic extends Model
 {
     protected $guarded = [];
 
-    public function user()
+    public function analyticUser()
     {
-        return $this->belongsToMany(
-            config('bqanalytics.user'),
-            config('bqanalytics.analytic_user_table'),
-            'analytic_id',
-            'user_id'
-        );
+        return $this->hasMany(config('bqanalytic.analyticPreferences'));
     }
 }

@@ -30,7 +30,10 @@ abstract class TestCase extends TestBench
     public function setUp(): void
     {
         $this->installTestApp();
+
         parent::setUp();
+
+        $this->withFactories(__DIR__ . '/../database/factories');
     }
 
     /**
