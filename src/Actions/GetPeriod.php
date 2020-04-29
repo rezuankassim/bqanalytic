@@ -16,7 +16,7 @@ class GetPeriod
         $this->clientName = $clientName;
         $this->startDate = $startDate;
 
-        if (!$endDate) {
+        if ($endDate) {
             $this->endDate = $endDate;
         } else {
             $this->endDate = $startDate;

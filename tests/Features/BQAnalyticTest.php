@@ -32,12 +32,4 @@ class BQAnalyticTest extends TestCase
             'google_bq_dataset_name' => 'testing_bq_dataset_name'
         ], $accounts);
     }
-
-    public function test_get_period_from_command_while_table_record_is_empty()
-    {
-        // $this->assertTrue(true);
-        // $period = (new GetPeriod('Test', '20200402', '20200404'))->execute();
-
-        // dd($period);
-    }
 }
