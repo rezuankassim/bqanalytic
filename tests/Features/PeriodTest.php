@@ -52,4 +52,20 @@ class PeriodTest extends TestCase
         $this->assertCount(1, $period);
         $this->assertContainsEquals(Carbon::createFromFormat('Ymd', '20200430'), $period);
     }
+
+    /** @test */
+    public function it_generates_an_array_of_dates_if_start_date_not_given()
+    {
+        $client = factory(BQClient::class)->create();
+        $bqtable = factory(BQTable::class)->create([
+            'table_date' => Carbon::yesterday()->subDay()->format('Y-m-d'),
+            'status' => 0,
+            'dataset' => $client->name
+        ]);
+        $period = (new GetPeriod($client->name))->execute();
+
+        $this->assertCount(2, $period);
+        $this->assertContainsEquals(Carbon::yesterday()->subDay(), $period);
+        $this->assertContainsEquals(Carbon::yesterday(), $period);
+    }
 }
