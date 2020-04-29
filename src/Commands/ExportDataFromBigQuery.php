@@ -2,7 +2,6 @@
 
 namespace RezuanKassim\BQAnalytic\Commands;
 
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use RezuanKassim\BQAnalytic\Actions\GetClient;
 use RezuanKassim\BQAnalytic\Actions\GetPeriod;

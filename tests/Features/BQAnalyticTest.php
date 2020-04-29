@@ -4,7 +4,6 @@ namespace RezuanKassim\BQAnalytic\Tests\Features;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RezuanKassim\BQAnalytic\Actions\GetClient;
-use RezuanKassim\BQAnalytic\Actions\GetPeriod;
 use RezuanKassim\BQAnalytic\Tests\TestCase;
 
 class BQAnalyticTest extends TestCase

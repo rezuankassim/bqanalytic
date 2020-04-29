@@ -2,8 +2,6 @@
 
 namespace RezuanKassim\BQAnalytic\Traits;
 
-use Illuminate\Support\Facades\File;
-
 trait hasMorphClient
 {
     public function analyticPreferences()
