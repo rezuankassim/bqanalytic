@@ -40,11 +40,6 @@ class ExportDataFromBigQuery extends Command
      */
     public function handle()
     {
-        $this->getAllResultsAndStoreIntoDatabase();
-    }
-
-    protected function getAllResultsAndStoreIntoDatabase()
-    {
         $accounts = (new GetClient())->execute(config('bqanalytic.client_from_db'));
 
         foreach ($accounts as $account) {
