@@ -1,46 +1,15 @@
 <?php
 
 return [
-    /**
-     * User model
-     *
-     * This is the directory of the user model in the project
-     */
     'user' => env('BQANALYTIC_USER_MODEL', 'App\User'),
 
-    /**
-     * Analytic model
-     *
-     * This is the directory of the analytic model in the project
-     */
     'analytic' => env('BQANALYTIC_ANALYTIC_MODEL', \RezuanKassim\BQAnalytic\Models\BQAnalytic::class),
 
-    /**
-     * Big Query model
-     *
-     * This is the directory of the bigquery model in the project
-     */
     'bigquery' => env('BQANALYTIC_BQ_MODEL', \RezuanKassim\BQAnalytic\Models\BQData::class),
 
-    /**
-     * Big Query Table model
-     *
-     * This is the directory of the bigquery table model in the project
-     */
     'bigquery_table' => env('BQANALYTIC_BQ_TABLE', \RezuanKassim\BQAnalytic\Models\BQTable::class),
 
-     /**
-     * Big Query Table Name
-     *
-     * This is for the table name in Big Query
-     */
-    'bigquery_dataset_array' => explode(',', env('BQANALYTIC_BQ_TABLE_NAME_ARRAY')),
-
-
     'google' => [
-        /**
-         *  Google accounts
-         */
         'accounts' => [
             [
                 'name' => env('GOOGLE_CLOUD_APPLICATION_NAME'),
@@ -48,6 +17,48 @@ return [
                 'google_project_id' => env('GOOGLE_CLOUD_PROJECT_ID', ''),
                 'google_bq_dataset_name' => env('BQANALYTIC_BQ_TABLE_NAME', '')
             ]
+        ]
+    ],
+
+    'models' => [
+        'project' => [
+            'class' => env('BQANALYTIC_PROJECT_MODEL', \RezuanKassim\BQAnalytic\Models\BQProject::class),
+            'fk' => env('BQANALYTIC_PROJECT_FK', 'bqproject_id'),
+        ],
+
+        'app' => [
+            'class' => env('BQANALYTIC_APP_MODEL', \RezuanKassim\BQAnalytic\Models\BQApp::class),
+            'fk' => env('BQANALYTIC_PROJECT_FK', 'bqapp_id'),
+        ],
+
+        'client' => [
+            'class' => env('BQANALYTIC_CLIENT_MODEL', \RezuanKassim\BQAnalytic\Models\BQClient::class),
+            'fk' => env('BQANALYTIC_CLIENT_FK', 'bqclient_id'),
+        ],
+
+        'preferences' => [
+            'class' => env('BQANALYTIC_PREFERENCES_MODEL', \RezuanKassim\BQAnalytic\Models\BQAnalyticPreference::class),
+            'fk' => env('BQANALYTIC_PREFERENCES_FK', 'bqanalyticpreference_id')
+        ],
+
+        'data' => [
+            'class' => env('BQANALYTIC_DATA_MODEL', \RezuanKassim\BQAnalytic\Models\BQData::class),
+            'fk' => env('BQANALYTIC_DATA_FK', 'bqdata_id'),
+        ],
+
+        'table' => [
+            'class' => env('BQANALYTIC_TABLE_MODEL', \RezuanKassim\BQAnalytic\Models\BQTable::class),
+            'fk' => env('BQANALYTIC_TABLE_FK', 'bqtable_id'),
+        ],
+
+        'analytic' => [
+            'class' => env('BQANALYTIC_ANALYTIC_MODEL', \RezuanKassim\BQAnalytic\Models\BQAnalytic::class),
+            'fk' => env('BQANALYTIC_ANALYTIC_FK', 'bqtable_id')
+        ],
+
+        'user' => [
+            'class' => env('BQANALYTIC_USER_MODEL', 'App\User'),
+            'fk' => env('BQANALYTIC_USER_FK', 'user_id')
         ]
     ],
 
