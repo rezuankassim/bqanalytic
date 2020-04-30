@@ -3,23 +3,25 @@
 namespace RezuanKassim\BQAnalytic;
 
 use Illuminate\Support\Facades\DB;
+use IlluminateAgnostic\Arr\Support\Arr;
 use PragmaRX\Countries\Package\Countries;
+use RezuanKassim\BQAnalytic\Actions\GetProject;
+use RezuanKassim\BQAnalytic\Models\BQApp;
 
 class BQAnalytic
 {
     private $start_date;
     private $end_date;
-    private $analytic;
-    private $client;
-    private $subclient;
+    private $bqanalytic;
+    private $bqapp;
 
-    public function __construct($user, $start_date, $end_date, $client = null, $subclient = null, $filterableType = null, $filterableId = null)
+    public function __construct($user, $start_date, $end_date, $bqapp = null)
     {
+        $this->user = $user;
         $this->start_date = $start_date;
         $this->end_date = $end_date;
-        $this->analytic = $user->analyticPreferences()->where('filterable_type', $filterableType)->where('filterable_id', $filterableId)->get()->pluck('analytic') ?? collect([]);
-        $this->client = $client;
-        $this->subclient = $subclient;
+        $this->bqapp = $bqapp;
+        $this->bqanalytic = $this->getAnalyticPreferences();
     }
 
     public function setOption(array $options)
@@ -33,55 +35,55 @@ class BQAnalytic
     {
         $results = [];
 
-        $accounts = $this->getClients();
+        $accounts = (new GetProject())->execute(config('bqanalytic.project_from_db'));
 
         foreach ($accounts as $account) {
             $results[$account['name']] = [];
 
-            if ($this->analytic->contains('name', 'get active users')) {
-                $results[$account['name']]['activeUsers'] = $this->getActiveUsers($account['google_bq_dataset_name']);
+            if ($this->bqanalytic->contains('name', 'get active users')) {
+                $results[$account['name']]['activeUsers'] = $this->getActiveUsers($account);
             }
 
-            if ($this->analytic->contains('name', 'get new users')) {
-                $results[$account['name']]['newUsers'] = $this->getNewUsers($account['google_bq_dataset_name']);
+            if ($this->bqanalytic->contains('name', 'get new users')) {
+                $results[$account['name']]['newUsers'] = $this->getNewUsers($account);
             }
 
-            if ($this->analytic->contains('name', 'get active users by platform')) {
-                $results[$account['name']]['activeUsersByPlatform'] = $this->getActiveUsersByPlatform($account['google_bq_dataset_name']);
+            if ($this->bqanalytic->contains('name', 'get active users by platform')) {
+                $results[$account['name']]['activeUsersByPlatform'] = $this->getActiveUsersByPlatform($account);
             }
 
-            if ($this->analytic->contains('name', 'get all event name with event count')) {
-                $results[$account['name']]['allEventWithEventCount'] = $this->getAllEventWithEventCount($account['google_bq_dataset_name']);
+            if ($this->bqanalytic->contains('name', 'get all event name with event count')) {
+                $results[$account['name']]['allEventWithEventCount'] = $this->getAllEventWithEventCount($account);
             }
 
-            if ($this->analytic->contains('name', 'get users by country')) {
-                $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account['google_bq_dataset_name']);
+            if ($this->bqanalytic->contains('name', 'get users by country')) {
+                $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account);
             }
 
-            if ($this->analytic->contains('name', 'get total event count by event name')) {
-                $results[$account['name']]['totalEventCountByEventName'] = $this->getTotalEventCountByEventName($account['google_bq_dataset_name']);
+            if ($this->bqanalytic->contains('name', 'get total event count by event name')) {
+                $results[$account['name']]['totalEventCountByEventName'] = $this->getTotalEventCountByEventName($account);
             }
 
-            if ($this->analytic->contains('name', 'get total event count by users')) {
-                $results[$account['name']]['totalEventCountByUsers'] = $this->getTotalEventCountByUsers($account['google_bq_dataset_name']);
+            if ($this->bqanalytic->contains('name', 'get total event count by users')) {
+                $results[$account['name']]['totalEventCountByUsers'] = $this->getTotalEventCountByUsers($account);
             }
         }
 
         return $results;
     }
 
-    private function getClients()
+    protected function getAnalyticPreferences()
     {
-        if (config('bqanalytic.client_from_db')) {
-            $accounts = config('bqanalytic.client')::where('name', $this->client)->where('status', 1)->get()->toArray();
-        } else {
-            $accounts = config('bqanalytic.google.accounts');
+        $query = $this->user->bqanalyticpreferences()->with('bqanalytic');
+
+        if ($this->bqapp) {
+            $query = $query->where('bqapp_id', $this->bqapp->id);
         }
 
-        return $accounts;
+        return $query->get()->pluck('bqanalytic');
     }
 
-    private function getActiveUsers($dataset)
+    private function getActiveUsers($account)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("COUNT(DISTINCT
@@ -104,17 +106,22 @@ class BQAnalytic
                                     WHEN JSON_UNQUOTE(JSON_EXTRACT(device, '$.category')) = 'desktop' AND event_name = 'user_engagement' THEN user_pseudo_id
                                     ELSE NULL
                                 END)) AS active_desktop_user_count"))
-            ->whereBetween('event_date', [$this->start_date, $this->end_date])
-            ->where('dataset', $dataset);
+            ->whereBetween('event_date', [$this->start_date, $this->end_date]);
 
-        if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        if ($this->bqapp) {
+            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+
+            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+        } else {
+            $results = $results->where('dataset', $account['google_bq_dataset_name']);
         }
 
         return $results->get()->toArray()[0];
     }
 
-    private function getNewUsers($dataset)
+    private function getNewUsers($account)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("DATE_FORMAT(STR_TO_DATE(event_date, '%Y%m%d'), '%d/%m/%Y') as date,
@@ -123,17 +130,22 @@ class BQAnalytic
                                     ELSE NULL
                                     END)) AS new_user_count"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
-            ->where('dataset', $dataset)
             ->groupBy('date')->orderBy('date');
 
-        if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        if ($this->bqapp) {
+            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+
+            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+        } else {
+            $results = $results->where('dataset', $account['google_bq_dataset_name']);
         }
 
         return $results->get()->toArray();
     }
 
-    private function getActiveUsersByPlatform($dataset)
+    private function getActiveUsersByPlatform($account)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("DATE_FORMAT(STR_TO_DATE(event_date, '%Y%m%d'), '%d/%m/%Y') as date, 
@@ -150,43 +162,58 @@ class BQAnalytic
                                     ELSE NULL
                                     END)) as other_platform"))
             ->whereBetween('event_date', [$this->start_date, $this->end_date])
-            ->where('dataset', $dataset)
             ->groupBy('date')->orderBy('date');
 
-        if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", [$this->subclient]);
+        if ($this->bqapp) {
+            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+
+            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+        } else {
+            $results = $results->where('dataset', $account['google_bq_dataset_name']);
         }
 
 
         return $results->get()->toArray();
     }
 
-    private function getAllEventWithEventCount($dataset)
+    private function getAllEventWithEventCount($account)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, count(distinct user_pseudo_id) as event_count'))
-            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name');
 
-        if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        if ($this->bqapp) {
+            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+
+            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+        } else {
+            $results = $results->where('dataset', $account['google_bq_dataset_name']);
         }
 
         return $results->get()->toArray();
     }
 
-    private function getUsersByCountry($dataset)
+    private function getUsersByCountry($account)
     {
         $countries = (new Countries())->all();
         $endResults = collect();
 
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw("count(distinct user_pseudo_id) as user_count, JSON_UNQUOTE(JSON_EXTRACT(geo, '$.country')) as country"))
-            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('country');
 
-        if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        if ($this->bqapp) {
+            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+
+            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+        } else {
+            $results = $results->where('dataset', $account['google_bq_dataset_name']);
         }
 
         $results = $results->get()->toArray();
@@ -202,29 +229,39 @@ class BQAnalytic
         return $results;
     }
 
-    private function getTotalEventCountByEventName($dataset)
+    private function getTotalEventCountByEventName($account)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, COUNT(event_name) as event_count'))
-            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name');
 
-        if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        if ($this->bqapp) {
+            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+
+            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+        } else {
+            $results = $results->where('dataset', $account['google_bq_dataset_name']);
         }
 
         return $results->get()->toArray();
     }
 
-    private function getTotalEventCountByUsers($dataset)
+    private function getTotalEventCountByUsers($account)
     {
         $results = config('bqanalytic.bigquery')::query()
             ->select(DB::raw('event_name, COUNT(DISTINCT user_pseudo_id) as event_count'))
-            ->where('dataset', $dataset)
             ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('event_name');
 
-        if ($this->subclient) {
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) = ?", $this->subclient);
+        if ($this->bqapp) {
+            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+
+            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+
+            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+        } else {
+            $results = $results->where('dataset', $account['google_bq_dataset_name']);
         }
 
         return $results->get()->toArray();

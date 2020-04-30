@@ -2,10 +2,12 @@
 
 namespace RezuanKassim\BQAnalytic\Traits;
 
+use RezuanKassim\BQAnalytic\Models\BQAnalyticPreference;
+
 trait hasAnalyticPreferences
 {
-    public function analyticPreferences()
+    public function bqanalyticpreferences()
     {
-        return $this->hasMany(config('bqanalytic.analyticPreferences'));
+        return $this->hasMany(BQAnalyticPreference::class, 'user_id');
     }
 }

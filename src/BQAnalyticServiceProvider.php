@@ -70,7 +70,7 @@ class BQAnalyticServiceProvider extends ServiceProvider
         ], 'bqanalytic.config');
 
         $this->publishes([
-            __DIR__ . '/../database/seeds/AnalyticSeeder.php' => database_path('/seeds/AnalyticSeeder.php'),
+            __DIR__ . '/../database/seeds/BQAnalyticSeeder.php' => database_path('/seeds/BQAnalyticSeeder.php'),
         ], 'bqanalytic.seeder');
 
         // Publishing the views.

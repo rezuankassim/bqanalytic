@@ -3,17 +3,18 @@
 namespace RezuanKassim\BQAnalytic\Actions;
 
 use Carbon\Carbon;
-use RezuanKassim\BQAnalytic\BQTable;
+use RezuanKassim\BQAnalytic\Models\BQProject;
+use RezuanKassim\BQAnalytic\Models\BQTable;
 
 class GetPeriod
 {
     private $startDate;
     private $endData;
-    private $clientName;
+    private $project;
 
-    public function __construct($clientName, $startDate = null, $endDate = null)
+    public function __construct($project, $startDate = null, $endDate = null)
     {
-        $this->clientName = $clientName;
+        $this->project = $project;
         $this->startDate = $startDate;
 
         if ($endDate) {
@@ -28,11 +29,15 @@ class GetPeriod
         $dates = collect();
 
         if (!$this->startDate) {
-            if (BQTable::where('table_date', Carbon::yesterday()->format('Y-m-d'))->where('dataset', $this->clientName)->count() == 0) {
+            if (
+                BQTable::where('table_date', Carbon::yesterday()->format('Y-m-d'))->where('bqproject_name', $this->project['name'])->count() == 0
+            ) {
                 $dates->push(Carbon::yesterday());
             }
 
-            foreach (BQTable::where('dataset', $this->clientName)->where('status', 0)->get() as $failed_dates) {
+            foreach (
+                BQTable::where('bqproject_name', $this->project['name'])->where('status', 0)->get() as $failed_dates
+            ) {
                 $dates->push($failed_dates->table_date);
             }
         } else {
@@ -46,7 +51,7 @@ class GetPeriod
         }
 
         return $dates->filter(function ($date) {
-            return BQTable::where('table_date', $date->format('Y-m-d'))->where('dataset', $this->clientName)->where('status', 1)->count() == 0;
+            return BQTable::where('table_date', $date->format('Y-m-d'))->where('bqproject_name', $this->project['name'])->where('status', 1)->count() == 0;
         })->sort();
     }
 }

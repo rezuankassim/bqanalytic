@@ -5,9 +5,10 @@ namespace RezuanKassim\BQAnalytic\Commands;
 use Illuminate\Console\Command;
 use RezuanKassim\BQAnalytic\Actions\GetClient;
 use RezuanKassim\BQAnalytic\Actions\GetPeriod;
+use RezuanKassim\BQAnalytic\Actions\GetProject;
 use RezuanKassim\BQAnalytic\BQAnalyticClientFactory;
-use RezuanKassim\BQAnalytic\BQData;
-use RezuanKassim\BQAnalytic\BQTable;
+use RezuanKassim\BQAnalytic\Models\BQTable;
+use RezuanKassim\BQAnalytic\Models\BQData;
 use RezuanKassim\BQAnalytic\ProgressBar;
 
 /**
@@ -39,13 +40,13 @@ class ExportDataFromBigQuery extends Command
      */
     public function handle()
     {
-        $accounts = (new GetClient())->execute(config('bqanalytic.client_from_db'));
+        $accounts = (new GetProject())->execute(config('bqanalytic.client_from_db'));
 
         foreach ($accounts as $account) {
-            $period = (new GetPeriod($account['name'], $this->argument('start'), $this->argument('end')))->execute();
+            $period = (new GetPeriod($account, $this->argument('start'), $this->argument('end')))->execute();
 
             $BQAnalyticClient = BQAnalyticClientFactory::create([
-                'credential' => storage_path('app/' . $account['google_credential']),
+                'credential' => storage_path('app/' . $account['google_credential_path']),
                 'project' => $account['google_project_id'],
                 'auth_cache_store' => 'file',
                 'client_options' => ['retries' => 3]
@@ -79,7 +80,7 @@ class ExportDataFromBigQuery extends Command
 
             return BQTable::updateOrCreate([
                 'table_date' => $start_date->format('Y-m-d'),
-                'dataset' => $name
+                'bqproject_name' => $name
             ], [
                 'status' => 1
             ]);
@@ -89,7 +90,7 @@ class ExportDataFromBigQuery extends Command
 
         return BQTable::updateOrCreate([
             'table_date' => $start_date->format('Y-m-d'),
-            'dataset' => $name
+            'bqproject_name' => $name
         ], [
             'status' => 0
         ]);

@@ -2,12 +2,12 @@
 
 namespace RezuanKassim\BQAnalytic\Actions;
 
-class GetClient
+class GetProject
 {
     public function execute($clientFromDB)
     {
         if ($clientFromDB) {
-            return config('bqanalytic.client')::where('status', 1)->get()->toArray();
+            return config('bqanalytic.project')::all()->toArray();
         } else {
             return config('bqanalytic.google.accounts');
         }

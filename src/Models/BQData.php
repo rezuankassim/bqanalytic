@@ -1,6 +1,6 @@
 <?php
 
-namespace RezuanKassim\BQAnalytic;
+namespace RezuanKassim\BQAnalytic\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,7 +8,7 @@ class BQData extends Model
 {
     protected $guarded = [];
 
-    protected $table = 'bq_data';
+    protected $table = 'bqdata';
 
     protected $casts = [
         'event_date' => 'date:Ymd',
