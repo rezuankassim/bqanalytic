@@ -10,6 +10,7 @@ class ModifyExistingBqTable extends Migration
     {
         Schema::dropIfExists('bq_tables');
         Schema::create('bqtables', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->string('table_date');
             $table->boolean('status')->default(0);
             $table->string('bqproject_name');
@@ -18,6 +19,7 @@ class ModifyExistingBqTable extends Migration
 
         Schema::dropIfExists('bq_data');
         Schema::create('bqdata', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->string('event_date')->nullable();
             $table->bigInteger('event_timestamp')->nullable();
             $table->string('event_name')->nullable();
