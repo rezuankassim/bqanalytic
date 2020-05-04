@@ -40,7 +40,7 @@ class ExportDataFromBigQuery extends Command
      */
     public function handle()
     {
-        $accounts = (new GetProject())->execute(config('bqanalytic.client_from_db'));
+        $accounts = (new GetProject())->execute(config('bqanalytic.project_from_db'));
 
         foreach ($accounts as $account) {
             $period = (new GetPeriod($account, $this->argument('start'), $this->argument('end')))->execute();
