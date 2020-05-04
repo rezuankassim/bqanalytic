@@ -23,6 +23,7 @@ class CreateBQModelsTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('last_logged_at')->nullable();
             $table->string('password');
             $table->timestamps();
         });
