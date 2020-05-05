@@ -28,25 +28,35 @@ class GetPeriod
     {
         $dates = collect();
 
+        if ($this->project['start_date']) {
+            if ($this->project['start_date'] instanceof \Illuminate\Support\Carbon) {
+                $this->startDate = $this->project['start_date']->startOfDay()->format('Ymd');
+            } else {
+                $this->startDate = $this->project['start_date'];
+            }
+
+            $this->endDate = Carbon::today()->format('Ymd');
+        }
+
         if (!$this->startDate) {
             if (
                 BQTable::where('table_date', Carbon::yesterday()->format('Y-m-d'))->where('bqproject_name', $this->project['name'])->count() == 0
             ) {
-                $dates->push(Carbon::yesterday());
+                $dates->push(Carbon::yesterday()->startOfDay());
             }
 
             foreach (
                 BQTable::where('bqproject_name', $this->project['name'])->where('status', 0)->get() as $failed_dates
             ) {
-                $dates->push($failed_dates->table_date);
+                $dates->push($failed_dates->table_date->startOfDay());
             }
         } else {
-            $startDate = Carbon::createFromFormat('Ymd', $this->startDate);
-            $endDate = Carbon::createFromFormat('Ymd', $this->endDate);
+            $startDate = Carbon::createFromFormat('Ymd', $this->startDate)->startOfDay();
+            $endDate = Carbon::createFromFormat('Ymd', $this->endDate)->startOfDay();
 
             while ($startDate <= $endDate) {
                 $dates->push($startDate);
-                $startDate = Carbon::parse($startDate)->addDay();
+                $startDate = Carbon::createFromFormat('Ymd', $startDate->format('Ymd'))->startOfDay()->addDay();
             }
         }
 

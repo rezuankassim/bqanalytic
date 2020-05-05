@@ -15,7 +15,8 @@ return [
                 'name' => env('GOOGLE_CLOUD_APPLICATION_NAME'),
                 'google_credential_path' => env('GOOGLE_CLOUD_APPLICATION_CREDENTIALS', ''),
                 'google_project_id' => env('GOOGLE_CLOUD_PROJECT_ID', ''),
-                'google_bq_dataset_name' => env('BQANALYTIC_BQ_TABLE_NAME', '')
+                'google_bq_dataset_name' => env('BQANALYTIC_BQ_TABLE_NAME', ''),
+                'start_date' => env('GOOGLE_BQANALYTIC_START_DATE'),
             ]
         ]
     ],

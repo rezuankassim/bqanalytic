@@ -10,6 +10,10 @@ class BQProject extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'start_date' => 'date'
+    ];
+
     public function bqapps()
     {
         return $this->hasMany(BQApp::class, 'bqproject_id');

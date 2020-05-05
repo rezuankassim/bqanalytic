@@ -3,6 +3,7 @@
 namespace RezuanKassim\BQAnalytic\Tests\Features;
 
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RezuanKassim\BQAnalytic\Actions\GetPeriod;
 use RezuanKassim\BQAnalytic\BQClient;
@@ -76,5 +77,17 @@ class PeriodTest extends TestCase
         $this->assertCount(2, $period);
         $this->assertContainsEquals(Carbon::yesterday()->subDay(), $period);
         $this->assertContainsEquals(Carbon::yesterday(), $period);
+    }
+
+    /** @test */
+    public function it_generates_an_array_of_dates_with_start_date_from_project()
+    {
+        $project = factory(BQProject::class)->create();
+        $period = (new GetPeriod($project))->execute();
+        $carbonPeriod = CarbonPeriod::create($project->start_date, Carbon::now());
+
+        $this->assertCount($carbonPeriod->count(), $period);
+        $this->assertEquals($carbonPeriod->first(), $period->first());
+        $this->assertEquals($carbonPeriod->last(), $period->last());
     }
 }
