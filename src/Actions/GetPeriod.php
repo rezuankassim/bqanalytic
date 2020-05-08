@@ -8,11 +8,12 @@ use RezuanKassim\BQAnalytic\Models\BQTable;
 
 class GetPeriod
 {
-    private $startDate;
-    private $endData;
-    private $project;
+    protected $startDate;
+    protected $endData;
+    protected $project;
+    protected $first;
 
-    public function __construct($project, $startDate = null, $endDate = null)
+    public function __construct($project, $startDate = null, $endDate = null, $first = false)
     {
         $this->project = $project;
         $this->startDate = $startDate;
@@ -22,13 +23,15 @@ class GetPeriod
         } else {
             $this->endDate = $startDate;
         }
+
+        $this->first = $first;
     }
 
     public function execute()
     {
         $dates = collect();
 
-        if ($this->project['start_date']) {
+        if ($this->first && $this->project['start_date']) {
             $this->startDate = Carbon::parse($this->project['start_date'])->startOfDay()->format('Ymd');
             $this->endDate = Carbon::today()->format('Ymd');
         }

@@ -26,7 +26,8 @@ class ExportDataFromBigQuery extends Command
     protected $signature = 'bqanalytic:export
                             {start? : Start date}
                             {end? : End date}
-                            {--id=*}';
+                            {--id=*}
+                            {--first=true}';
 
     /**
      * The console command description.
@@ -44,7 +45,7 @@ class ExportDataFromBigQuery extends Command
         $accounts = (new GetProject())->execute(config('bqanalytic.project_from_db'), $this->option('id'));
 
         foreach ($accounts as $account) {
-            $period = (new GetPeriod($account, $this->argument('start'), $this->argument('end')))->execute();
+            $period = (new GetPeriod($account, $this->argument('start'), $this->argument('end'), $this->option('first')))->execute();
 
             $BQAnalyticClient = BQAnalyticClientFactory::create([
                 'credential' => storage_path('app/' . $account['google_credential_path']),

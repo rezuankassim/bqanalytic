@@ -80,7 +80,7 @@ class PeriodTest extends TestCase
     }
 
     /** @test */
-    public function it_generates_an_array_of_dates_with_start_date_from_project()
+    public function it_generates_an_array_of_dates_with_start_date_not_first_time_from_project()
     {
         $project = factory(BQProject::class)->create();
         $period = (new GetPeriod($project))->execute();
@@ -89,5 +89,18 @@ class PeriodTest extends TestCase
         $this->assertCount($carbonPeriod->count(), $period);
         $this->assertEquals($carbonPeriod->first(), $period->first());
         $this->assertEquals($carbonPeriod->last(), $period->last());
+    }
+
+    /** @test */
+    public function it_generates_an_array_of_dates_with_start_date_first_time_project()
+    {
+        $project = factory(BQProject::class)->create();
+        $period = (new GetPeriod($project, null, null, true))->execute();
+        $carbonPeriod = CarbonPeriod::create($project->start_date, Carbon::now());
+
+        $this->assertCount($carbonPeriod->count(), $period);
+        $this->assertEquals($carbonPeriod->first(), $period->first());
+        $this->assertEquals($carbonPeriod->last(), $period->last());
+
     }
 }
