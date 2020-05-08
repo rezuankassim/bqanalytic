@@ -25,7 +25,8 @@ class ExportDataFromBigQuery extends Command
      */
     protected $signature = 'bqanalytic:export
                             {start? : Start date}
-                            {end? : End date}';
+                            {end? : End date}
+                            {--id=*}';
 
     /**
      * The console command description.
@@ -40,7 +41,7 @@ class ExportDataFromBigQuery extends Command
      */
     public function handle()
     {
-        $accounts = (new GetProject())->execute(config('bqanalytic.project_from_db'));
+        $accounts = (new GetProject())->execute(config('bqanalytic.project_from_db'), $this->option('id'));
 
         foreach ($accounts as $account) {
             $period = (new GetPeriod($account, $this->argument('start'), $this->argument('end')))->execute();

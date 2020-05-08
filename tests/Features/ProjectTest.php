@@ -45,4 +45,17 @@ class ProjectTest extends TestCase
         $this->assertCount(1, $accounts);
         $this->assertContains($project, $accounts);
     }
+
+    /** @test */
+    public function it_can_retrive_project_from_database_given_id()
+    {
+        config()->set('bqanalytic.project_from_db', true);
+        $project = factory(BQProject::class, 3)->create();
+        $target = $project->first()->id;
+
+        $accounts = (new GetProject())->execute(config('bqanalytic.project_from_db'), $target);
+
+        $this->assertCount(1, $accounts);
+        $this->assertContainsEquals($project->where('id', $target)->first()->toArray(), $accounts);
+    }
 }

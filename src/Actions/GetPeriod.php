@@ -29,15 +29,9 @@ class GetPeriod
         $dates = collect();
 
         if ($this->project['start_date']) {
-            if ($this->project['start_date'] instanceof \Illuminate\Support\Carbon) {
-                $this->startDate = $this->project['start_date']->startOfDay()->format('Ymd');
-            } else {
-                $this->startDate = $this->project['start_date'];
-            }
-
+            $this->startDate = Carbon::parse($this->project['start_date'])->startOfDay()->format('Ymd');
             $this->endDate = Carbon::today()->format('Ymd');
         }
-
 
         if (!$this->startDate) {
             if (
