@@ -52,7 +52,6 @@ class GetPeriod
                 $dates->push($failed_dates->table_date->startOfDay());
             }
         } else {
-            dd($this->startDate);
             $startDate = Carbon::createFromFormat('Ymd', $this->startDate)->startOfDay();
             $endDate = Carbon::createFromFormat('Ymd', $this->endDate)->startOfDay();
 
