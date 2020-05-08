@@ -85,16 +85,16 @@ class ExportDataFromBigQuery extends Command
             ], [
                 'status' => 1
             ]);
+        } elseif ($BQAnalyticClient->dataset($dataset)->table('events_intraday_' . $start_date->format('Ymd'))->exists()) {
+            $this->removeDataWithStartDate($start_date, $dataset);
+
+            return BQTable::updateOrCreate([
+                'table_date' => $start_date->format('Y-m-d'),
+                'bqproject_name' => $name
+            ], [
+                'status' => 0
+            ]);
         }
-
-        $this->removeDataWithStartDate($start_date, $dataset);
-
-        return BQTable::updateOrCreate([
-            'table_date' => $start_date->format('Y-m-d'),
-            'bqproject_name' => $name
-        ], [
-            'status' => 0
-        ]);
     }
 
     protected function removeDataWithStartDate($start_date, $dataset)
