@@ -25,9 +25,7 @@ class BQAnalyticServiceProvider extends ServiceProvider
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
 
         // Publishing is only necessary when using the CLI.
-        if ($this->app->runningInConsole()) {
-            $this->bootForConsole();
-        }
+        $this->bootForConsole();
     }
 
     /**
@@ -38,8 +36,6 @@ class BQAnalyticServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/bqanalytic.php', 'bqanalytic');
-
-        $bqAnalyticConfig = config('bqanalytic');
 
         // Register the service the package provides.
         $this->app->singleton('bqanalytic', function ($app) {
