@@ -32,7 +32,7 @@ abstract class TestCase extends TestBench
         $this->installTestApp();
 
         parent::setUp();
-        
+
         $this->artisan('migrate', ['--database' => 'testbench'])->run();
         $this->withFactories(__DIR__ . '/../database/factories');
     }

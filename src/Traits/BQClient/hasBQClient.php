@@ -2,7 +2,6 @@
 
 namespace RezuanKassim\BQAnalytic\Traits\BQClient;
 
-
 trait hasBQClient
 {
     public function bqapps()

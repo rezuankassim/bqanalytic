@@ -3,7 +3,6 @@
 namespace RezuanKassim\BQAnalytic\Actions;
 
 use Carbon\Carbon;
-use RezuanKassim\BQAnalytic\Models\BQProject;
 use RezuanKassim\BQAnalytic\Models\BQTable;
 
 class GetPeriod
@@ -11,9 +10,9 @@ class GetPeriod
     protected $startDate;
     protected $endData;
     protected $project;
-    protected $first;
+    protected bool $first;
 
-    public function __construct($project, $startDate = null, $endDate = null, $first = false)
+    public function __construct($project, $startDate = null, $endDate = null, $first)
     {
         $this->project = $project;
         $this->startDate = $startDate;

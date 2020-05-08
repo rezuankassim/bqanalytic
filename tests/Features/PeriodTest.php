@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RezuanKassim\BQAnalytic\Actions\GetPeriod;
-use RezuanKassim\BQAnalytic\BQClient;
 // use RezuanKassim\BQAnalytic\BQTable;
 use RezuanKassim\BQAnalytic\Models\BQProject;
 use RezuanKassim\BQAnalytic\Models\BQTable;
@@ -21,7 +20,7 @@ class PeriodTest extends TestCase
     {
         $project = factory(BQProject::class)->create();
         $period = (new GetPeriod($project, Carbon::today()->format('Ymd')))->execute();
-        
+
         $this->assertCount(1, $period);
         $this->assertContainsEquals(Carbon::createFromFormat('Ymd', '20200429'), $period);
     }
@@ -32,7 +31,7 @@ class PeriodTest extends TestCase
         $today = Carbon::today();
         $tomorrow = Carbon::tomorrow();
         $dayAfterTomorrow = Carbon::tomorrow()->addDay();
-        
+
         $project = factory(BQProject::class)->create();
         $period = (new GetPeriod($project, $today->format('Ymd'), $dayAfterTomorrow->format('Ymd')))->execute();
 
@@ -101,6 +100,5 @@ class PeriodTest extends TestCase
         $this->assertCount($carbonPeriod->count(), $period);
         $this->assertEquals($carbonPeriod->first(), $period->first());
         $this->assertEquals($carbonPeriod->last(), $period->last());
-
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use RezuanKassim\BQAnalytic\Analytic;
 
 class BQAnalyticSeeder extends Seeder
 {

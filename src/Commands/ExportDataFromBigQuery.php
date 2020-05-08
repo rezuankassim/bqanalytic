@@ -3,7 +3,6 @@
 namespace RezuanKassim\BQAnalytic\Commands;
 
 use Illuminate\Console\Command;
-use RezuanKassim\BQAnalytic\Actions\GetClient;
 use RezuanKassim\BQAnalytic\Actions\GetPeriod;
 use RezuanKassim\BQAnalytic\Actions\GetProject;
 use RezuanKassim\BQAnalytic\BQAnalyticClientFactory;
@@ -27,7 +26,7 @@ class ExportDataFromBigQuery extends Command
                             {start? : Start date}
                             {end? : End date}
                             {--id=*}
-                            {--first=true}';
+                            {--first}';
 
     /**
      * The console command description.

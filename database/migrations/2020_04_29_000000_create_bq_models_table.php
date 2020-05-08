@@ -38,6 +38,5 @@ class CreateBQModelsTable extends Migration
             $table->foreign('bqproject_id')->references('id')->on('bqprojects')->onDelete('cascade');
             $table->timestamps();
         });
-        
     }
 }

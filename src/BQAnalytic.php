@@ -3,10 +3,8 @@
 namespace RezuanKassim\BQAnalytic;
 
 use Illuminate\Support\Facades\DB;
-use IlluminateAgnostic\Arr\Support\Arr;
 use PragmaRX\Countries\Package\Countries;
 use RezuanKassim\BQAnalytic\Actions\GetProject;
-use RezuanKassim\BQAnalytic\Models\BQApp;
 
 class BQAnalytic
 {
