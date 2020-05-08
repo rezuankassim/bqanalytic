@@ -38,6 +38,7 @@ class GetPeriod
             $this->endDate = Carbon::today()->format('Ymd');
         }
 
+
         if (!$this->startDate) {
             if (
                 BQTable::where('table_date', Carbon::yesterday()->format('Y-m-d'))->where('bqproject_name', $this->project['name'])->count() == 0
@@ -51,6 +52,7 @@ class GetPeriod
                 $dates->push($failed_dates->table_date->startOfDay());
             }
         } else {
+            dd($this->startDate);
             $startDate = Carbon::createFromFormat('Ymd', $this->startDate)->startOfDay();
             $endDate = Carbon::createFromFormat('Ymd', $this->endDate)->startOfDay();
 
