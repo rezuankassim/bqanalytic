@@ -71,10 +71,12 @@ class ExportDataFromBigQuery extends Command
 
             $results = collect($this->returnResults($BQAnalyticClient, $query));
 
-            foreach ($results as $result) {
-                config('bqanalytic.bigquery')::create(collect($result)->merge([
-                    'dataset' => $dataset
-                ])->toArray());
+            foreach ($results->chunk(500) as $result) {
+                foreach ($result as $r) {
+                    config('bqanalytic.bigquery')::create(collect($r)->merge([
+                        'dataset' => $dataset
+                    ])->toArray());
+                }
             }
 
             return BQTable::updateOrCreate([
