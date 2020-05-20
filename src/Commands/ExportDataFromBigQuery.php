@@ -2,6 +2,7 @@
 
 namespace RezuanKassim\BQAnalytic\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use RezuanKassim\BQAnalytic\Actions\GetPeriod;
 use RezuanKassim\BQAnalytic\Actions\GetProject;
@@ -54,19 +55,19 @@ class ExportDataFromBigQuery extends Command
             ]);
 
             foreach ($period as $date) {
-                $this->getDataFromBigQuery($BQAnalyticClient, $date, $account['google_bq_dataset_name'], $account['name']);
+                $this->getDataFromBigQuery($BQAnalyticClient, $date, $account);
             }
         }
     }
 
-    protected function getDataFromBigQuery($BQAnalyticClient, $start_date, $dataset, $name)
+    protected function getDataFromBigQuery($BQAnalyticClient, $start_date, $account)
     {
-        if ($BQAnalyticClient->dataset($dataset)->table('events_' . $start_date->format('Ymd'))->exists()) {
+        if ($BQAnalyticClient->dataset($account['google_bq_dataset_name'])->table('events_' . $start_date->format('Ymd'))->exists()) {
             $query = "
                 SELECT 
                     *
                 FROM 
-                    " . $dataset . ".events_" . $start_date->format('Ymd') . "
+                    " . $account['google_bq_dataset_name'] . ".events_" . $start_date->format('Ymd') . "
             ";
 
             $results = collect($this->returnResults($BQAnalyticClient, $query));
@@ -74,23 +75,29 @@ class ExportDataFromBigQuery extends Command
             foreach ($results->chunk(500) as $result) {
                 foreach ($result as $r) {
                     config('bqanalytic.bigquery')::create(collect($r)->merge([
-                        'dataset' => $dataset
+                        'dataset' => $account['google_bq_dataset_name']
                     ])->toArray());
                 }
             }
 
-            return BQTable::updateOrCreate([
-                'table_date' => $start_date->format('Y-m-d'),
-                'bqproject_name' => $name
-            ], [
-                'status' => 1
-            ]);
-        } elseif ($BQAnalyticClient->dataset($dataset)->table('events_intraday_' . $start_date->format('Ymd'))->exists()) {
-            $this->removeDataWithStartDate($start_date, $dataset);
+            if (config('bqanalytic.project_from_db')) {
+                config('bqanalytic.models.project.class')::find($account['id'])->update([
+                    'last_imported_date' => $start_date
+                ]);
+            }
 
             return BQTable::updateOrCreate([
                 'table_date' => $start_date->format('Y-m-d'),
-                'bqproject_name' => $name
+                'bqproject_name' => $account['name']
+            ], [
+                'status' => 1
+            ]);
+        } elseif ($BQAnalyticClient->dataset($account['google_bq_dataset_name'])->table('events_intraday_' . $start_date->format('Ymd'))->exists()) {
+            $this->removeDataWithStartDate($start_date, $account['google_bq_dataset_name']);
+
+            return BQTable::updateOrCreate([
+                'table_date' => $start_date->format('Y-m-d'),
+                'bqproject_name' => $account['name']
             ], [
                 'status' => 0
             ]);
