@@ -65,14 +65,34 @@ class ExportDataFromBigQuery extends Command
         if ($BQAnalyticClient->dataset($account['google_bq_dataset_name'])->table('events_' . $start_date->format('Ymd'))->exists()) {
             $query = "
                 SELECT 
-                    *
+                    event_date,
+                    event_name,
+                    (SELECT key FROM UNNEST(event_params) WHERE key = 'firebase_screen_class') AS firebase_screen_class,
+                    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'firebase_screen_class') AS firebase_screen_class_value,
+                    user_id,
+                    user_pseudo_id,
+                    device.mobile_brand_name as device_mobile_brand_name,
+                    device.mobile_model_name as device_mobile_model_name,
+                    device.mobile_marketing_name as device_mobile_marketing_name,
+                    device.operating_system_version as device_operating_system_version,
+                    geo.city as geo_city,
+                    geo.region as geo_region,
+                    geo.country as geo_country,
+                    geo.continent as geo_continent,
+                    geo.sub_continent as geo_sub_continent,
+                    app_info.id as app_info_id,
+                    app_info.version as app_info_version,
+                    traffic_source.name as traffic_source_name,
+                    traffic_source.medium as traffic_source_medium,
+                    traffic_source.source as traffic_source_source,
+                platform,
                 FROM 
                     " . $account['google_bq_dataset_name'] . ".events_" . $start_date->format('Ymd') . "
             ";
 
             $results = collect($this->returnResults($BQAnalyticClient, $query));
 
-            foreach ($results->chunk(500) as $result) {
+            foreach ($results->chunk(1000) as $result) {
                 foreach ($result as $r) {
                     config('bqanalytic.bigquery')::create(collect($r)->merge([
                         'dataset' => $account['google_bq_dataset_name']
