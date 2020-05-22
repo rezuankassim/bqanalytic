@@ -12,7 +12,6 @@
     "keywords": ["Laravel", "BQAnalytic"],
     "require": {
         "illuminate/support": "~5|~6|~7",
-        "pragmarx/countries": "^0.7.0",
         "google/cloud-bigquery": "^1.15"
     },
     "require-dev": {

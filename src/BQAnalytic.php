@@ -54,9 +54,9 @@ class BQAnalytic
                 $results[$account['name']]['allEventWithEventCount'] = $this->getAllEventWithEventCount($account);
             }
 
-            if ($this->bqanalytic->contains('name', 'get users by country')) {
-                $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account);
-            }
+            // if ($this->bqanalytic->contains('name', 'get users by country')) {
+            //     $results[$account['name']]['usersByCountry'] = $this->getUsersByCountry($account);
+            // }
 
             if ($this->bqanalytic->contains('name', 'get total event count by event name')) {
                 $results[$account['name']]['totalEventCountByEventName'] = $this->getTotalEventCountByEventName($account);
@@ -195,37 +195,37 @@ class BQAnalytic
         return $results->get()->toArray();
     }
 
-    private function getUsersByCountry($account)
-    {
-        $countries = (new Countries())->all();
-        $endResults = collect();
+    // private function getUsersByCountry($account)
+    // {
+    //     $countries = (new Countries())->all();
+    //     $endResults = collect();
 
-        $results = config('bqanalytic.bigquery')::query()
-            ->select(DB::raw("count(distinct user_pseudo_id) as user_count, JSON_UNQUOTE(JSON_EXTRACT(geo, '$.country')) as country"))
-            ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('country');
+    //     $results = config('bqanalytic.bigquery')::query()
+    //         ->select(DB::raw("count(distinct user_pseudo_id) as user_count, JSON_UNQUOTE(JSON_EXTRACT(geo, '$.country')) as country"))
+    //         ->whereBetween('event_date', [$this->start_date, $this->end_date])->groupBy('country');
 
-        if ($this->bqapp) {
-            $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
+    //     if ($this->bqapp) {
+    //         $placeholder = implode(', ', array_fill(0, count($this->bqapp->bundles), '?'));
 
-            $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
+    //         $results = $results->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(app_info, '$.id')) IN ($placeholder)", $this->bqapp->bundles);
 
-            $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
-        } else {
-            $results = $results->where('dataset', $account['google_bq_dataset_name']);
-        }
+    //         $results = $results->where('dataset', $this->bqapp->bqproject->google_bq_dataset_name);
+    //     } else {
+    //         $results = $results->where('dataset', $account['google_bq_dataset_name']);
+    //     }
 
-        $results = $results->get()->toArray();
+    //     $results = $results->get()->toArray();
 
-        $results = collect($results)->filter(function ($value) {
-            return $value['country'] != null;
-        })->map(function ($value) use ($countries, $endResults) {
-            $endResults[$countries->where('name.common', $value['country'])->first()->cca2] = $value['user_count'];
-        });
+    //     $results = collect($results)->filter(function ($value) {
+    //         return $value['country'] != null;
+    //     })->map(function ($value) use ($countries, $endResults) {
+    //         $endResults[$countries->where('name.common', $value['country'])->first()->cca2] = $value['user_count'];
+    //     });
 
-        $results = $endResults->toArray();
+    //     $results = $endResults->toArray();
 
-        return $results;
-    }
+    //     return $results;
+    // }
 
     private function getTotalEventCountByEventName($account)
     {
