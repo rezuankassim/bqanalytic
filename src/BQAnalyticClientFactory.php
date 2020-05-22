@@ -5,7 +5,7 @@ namespace RezuanKassim\BQAnalytic;
 use Google\Auth\Cache\MemoryCacheItemPool;
 use Google\Cloud\BigQuery\BigQueryClient;
 use Illuminate\Support\Facades\Cache;
-use IlluminateAgnostic\Arr\Support\Arr;
+use Illuminate\Support\Arr;
 
 class BQAnalyticClientFactory
 {
