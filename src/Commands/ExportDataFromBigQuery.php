@@ -67,8 +67,8 @@ class ExportDataFromBigQuery extends Command
                 SELECT 
                     event_date,
                     event_name,
-                    (SELECT key FROM UNNEST(event_params) WHERE key = 'firebase_screen_class') AS firebase_screen_class,
-                    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'firebase_screen_class') AS firebase_screen_class_value,
+                    (SELECT key FROM UNNEST(event_params) WHERE key = 'currentPage') AS firebase_screen_class,
+                    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'currentPage') AS firebase_screen_class_value,
                     user_id,
                     user_pseudo_id,
                     device.mobile_brand_name as device_mobile_brand_name,
