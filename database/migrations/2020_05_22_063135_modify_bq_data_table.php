@@ -18,8 +18,10 @@ class ModifyBqDataTable extends Migration
             $table->bigIncrements('id');
             $table->string('event_date')->nullable();
             $table->string('event_name')->nullable();
-            $table->string('firebase_screen_class')->nullable();
-            $table->string('firebase_screen_class_value')->nullable();
+            $table->string('currentPage')->nullable();
+            $table->string('currentPage_value')->nullable();
+            $table->string('subCategory')->nullable();
+            $table->string('subCategory_value')->nullable();
             $table->string('user_id')->nullable();
             $table->string('user_pseudo_id')->nullable();
             $table->string('device_mobile_brand_name')->nullable();
