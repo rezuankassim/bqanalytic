@@ -18,12 +18,15 @@ class ModifyBqDataTable extends Migration
             $table->bigIncrements('id');
             $table->string('event_date')->nullable();
             $table->string('event_name')->nullable();
+            $table->bigInteger('event_timestamp')->nullable();
             $table->string('currentPage')->nullable();
             $table->string('currentPage_value')->nullable();
             $table->string('subCategory')->nullable();
             $table->string('subCategory_value')->nullable();
+            $table->bigInteger('engagement_time_msec')->nullable();
             $table->string('user_id')->nullable();
             $table->string('user_pseudo_id')->nullable();
+            $table->bigInteger('user_first_touch_timestamp')->nullable();
             $table->string('device_mobile_brand_name')->nullable();
             $table->string('device_mobile_model_name')->nullable();
             $table->string('device_mobile_marketing_name')->nullable();
