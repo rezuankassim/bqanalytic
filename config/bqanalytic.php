@@ -63,6 +63,8 @@ return [
         ]
     ],
 
+    'multiple_table' => env('BQANALYTIC_MULTIPLE_TABLE', false),
+
     'project_from_db' => env('BQANALYTIC_PROJECT_FROM_DB', false),
 
     'project' => env('BQANALYTIC_PROJECT_MODEL', \RezuanKassim\BQAnalytic\Models\BQProject::class),

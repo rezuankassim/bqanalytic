@@ -4,6 +4,7 @@ namespace RezuanKassim\BQAnalytic\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use RezuanKassim\BQAnalytic\Actions\GetPeriod;
 use RezuanKassim\BQAnalytic\Actions\GetProject;
 use RezuanKassim\BQAnalytic\BQAnalyticClientFactory;
@@ -97,13 +98,22 @@ class ExportDataFromBigQuery extends Command
 
             $results = collect($this->returnResults($BQAnalyticClient, $query));
 
-            foreach ($results->chunk(1000) as $result) {
-                foreach ($result as $r) {
-                    config('bqanalytic.bigquery')::create(collect($r)->merge([
-                        'dataset' => $account['google_bq_dataset_name']
-                    ])->toArray());
+            if (config('bqanalytic.multiple_table')) {
+                foreach ($results->chunk(1000) as $result) {
+                    foreach ($result as $r) {
+                        DB::table($account['google_bq_dataset_name'])->insert($r);
+                    }
+                }
+            } else {
+                foreach ($results->chunk(1000) as $result) {
+                    foreach ($result as $r) {
+                        config('bqanalytic.bigquery')::create(collect($r)->merge([
+                            'dataset' => $account['google_bq_dataset_name']
+                        ])->toArray());
+                    }
                 }
             }
+            
 
             if (config('bqanalytic.project_from_db')) {
                 config('bqanalytic.models.project.class')::find($account['id'])->update([
