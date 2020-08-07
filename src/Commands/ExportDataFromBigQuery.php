@@ -139,11 +139,11 @@ class ExportDataFromBigQuery extends Command
 
             return BQTable::updateOrCreate([
                 'table_date' => $start_date->format('Y-m-d'),
-                'bqproject_name' => $account['name'],
+                'bqproject_name' => $account['name']
+            ], [
+                'status' => 1,
                 'bigquery_count' => $count,
                 'bqdata_count' => $bqdata_count
-            ], [
-                'status' => 1
             ]);
         } elseif ($BQAnalyticClient->dataset($account['google_bq_dataset_name'])->table('events_intraday_' . $start_date->format('Ymd'))->exists()) {
             $this->removeDataWithStartDate($start_date, $account['google_bq_dataset_name']);
