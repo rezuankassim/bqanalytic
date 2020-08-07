@@ -14,7 +14,7 @@ class AddBigqueryCountAndBqdataCountInBqtablesTable extends Migration
     public function up()
     {
         Schema::table('bqtables', function (Blueprint $table) {
-            $table->id('id');
+            // $table->id('id');
             $table->integer('bigquery_count')->nullable()->after('bqproject_name');
             $table->integer('bqdata_count')->nullable()->after('bigquery_count');
         });
