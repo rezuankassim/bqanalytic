@@ -5,11 +5,13 @@ namespace RezuanKassim\BQAnalytic;
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use RezuanKassim\BQAnalytic\Commands\ExportDataFromBigQuery;
+use RezuanKassim\BQAnalytic\Commands\ReimportDataIfIncorrectCount;
 
 class BQAnalyticServiceProvider extends ServiceProvider
 {
     protected $commands = [
         ExportDataFromBigQuery::class,
+        ReimportDataIfIncorrectCount::class
     ];
 
     /**

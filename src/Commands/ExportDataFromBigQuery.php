@@ -96,6 +96,15 @@ class ExportDataFromBigQuery extends Command
                     " . $account['google_bq_dataset_name'] . ".events_" . $start_date->format('Ymd') . "
             ";
 
+            $countQuery = "
+                SELECT
+                    COUNT (*) as count
+                FROM
+                    {$account['google_bq_dataset_name']}.events_{$start_date->format('Ymd')}
+            ";
+
+            $count = collect($this->returnResults($BQAnalyticClient, $countQuery))->first()['count'];
+
             $results = collect($this->returnResults($BQAnalyticClient, $query));
 
             if (config('bqanalytic.multiple_table')) {
@@ -104,6 +113,11 @@ class ExportDataFromBigQuery extends Command
                         DB::table($account['google_bq_dataset_name'])->insert($r);
                     }
                 }
+
+                $bqdata_count = DB::table($account['google_bq_dataset_name'])
+                            ->where('event_date', $start_date->format('Ymd'))
+                            ->count(); 
+
             } else {
                 foreach ($results->chunk(1000) as $result) {
                     foreach ($result as $r) {
@@ -112,8 +126,10 @@ class ExportDataFromBigQuery extends Command
                         ])->toArray());
                     }
                 }
+
+                $bqdata_count = config('bqanalytic.bigquery')::where('event_date', $start_date->format('Ymd'))
+                                ->count();
             }
-            
 
             if (config('bqanalytic.project_from_db')) {
                 config('bqanalytic.models.project.class')::find($account['id'])->update([
@@ -123,7 +139,9 @@ class ExportDataFromBigQuery extends Command
 
             return BQTable::updateOrCreate([
                 'table_date' => $start_date->format('Y-m-d'),
-                'bqproject_name' => $account['name']
+                'bqproject_name' => $account['name'],
+                'bigquery_count' => $count,
+                'bqdata_count' => $bqdata_count
             ], [
                 'status' => 1
             ]);
